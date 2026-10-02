@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>{{ title }} - MovieTicket</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+
+<body>
+
+
+    <!-- NAVIGATION -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            🎬 MovieTicket
+        </div>
+
+        <div class="nav-links">
+
+            <a href="/">
+                Home
+            </a>
+
+            <a href="/movies">
+                Movies
+            </a>
+
+            <a href="/shows">
+                Shows
+            </a>
+
+            {% if session.get("user_id") %}
+
+                <span class="welcome-user">
+                    Hi, {{ session.get("user_name") }}
+                </span>
+
+                <a href="/logout">
+                    Logout
+                </a>
+
+            {% else %}
+
+                <a href="/login">
+                    Login
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- ERROR PAGE -->
+
+    <section class="error-section">
+
+        <div class="error-card">
+
+
+            <div class="error-icon">
+                !
+            </div>
+
+
+            <p class="error-small-title">
+                MOVIETICKET
+            </p>
+
+
+            <h1>
+                {{ title }}
+            </h1>
+
+
+            <p class="error-message">
+                {{ message }}
+            </p>
+
+
+            <div class="error-actions">
+
+                <a href="{{ back_url }}">
+
+                    <button class="primary-button">
+                        ← Go Back
+                    </button>
+
+                </a>
+
+
+                <a href="/">
+
+                    <button class="secondary-button">
+                        Home
+                    </button>
+
+                </a>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- FOOTER -->
+
+    <footer>
+
+        <h3>
+            🎬 MovieTicket
+        </h3>
+
+        <p>
+            Your simple movie ticket booking system.
+        </p>
+
+        <p class="footer-copy">
+            © 2026 MovieTicket. All rights reserved.
+        </p>
+
+    </footer>
+
+
+</body>
+
+</html>

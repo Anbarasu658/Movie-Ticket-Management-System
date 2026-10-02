@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Admin Dashboard - MovieTicket</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     NAVIGATION
+===================================================== -->
+
+<nav class="navbar">
+
+    <div class="logo">
+        🎬 MovieTicket
+    </div>
+
+
+    <div class="nav-links">
+
+        <a href="/">
+            Home
+        </a>
+
+        <a href="/movies">
+            Movies
+        </a>
+
+        <a href="/admin-logout">
+            Logout
+        </a>
+
+    </div>
+
+</nav>
+
+
+
+<!-- =====================================================
+     ADMIN HEADER
+===================================================== -->
+
+<section class="admin-header">
+
+    <div>
+
+        <p class="hero-small-title">
+            ADMIN PANEL
+        </p>
+
+        <h1>
+            Admin Dashboard
+        </h1>
+
+        <p>
+            Manage movies, shows, users and bookings.
+        </p>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     ADMIN CONTENT
+===================================================== -->
+
+<section class="admin-section">
+
+
+    <!-- =================================================
+         STATISTICS
+    ================================================== -->
+
+    <div class="admin-container">
+
+
+        <!-- USERS -->
+
+        <div class="admin-card">
+
+            <div class="admin-card-icon">
+                👤
+            </div>
+
+            <p class="admin-stat-label">
+                TOTAL USERS
+            </p>
+
+            <p class="admin-number">
+                {{ users|length }}
+            </p>
+
+            <p>
+                Registered users
+            </p>
+
+        </div>
+
+
+
+        <!-- MOVIES -->
+
+        <div class="admin-card">
+
+            <div class="admin-card-icon">
+                🎬
+            </div>
+
+            <p class="admin-stat-label">
+                TOTAL MOVIES
+            </p>
+
+            <p class="admin-number">
+                {{ movies|length }}
+            </p>
+
+            <p>
+                Movies available
+            </p>
+
+        </div>
+
+
+
+        <!-- SHOWS -->
+
+        <div class="admin-card">
+
+            <div class="admin-card-icon">
+                🕐
+            </div>
+
+            <p class="admin-stat-label">
+                TOTAL SHOWS
+            </p>
+
+            <p class="admin-number">
+                {{ shows|length }}
+            </p>
+
+            <p>
+                Scheduled shows
+            </p>
+
+        </div>
+
+
+
+        <!-- BOOKINGS -->
+
+        <div class="admin-card">
+
+            <div class="admin-card-icon">
+                🎟️
+            </div>
+
+            <p class="admin-stat-label">
+                TOTAL BOOKINGS
+            </p>
+
+            <p class="admin-number">
+                {{ bookings|length }}
+            </p>
+
+            <p>
+                Booked seats
+            </p>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         ADMIN ACTIONS
+    ================================================== -->
+
+    <div class="admin-section-title">
+
+        <p>
+            QUICK ACTIONS
+        </p>
+
+        <h2>
+            Management
+        </h2>
+
+    </div>
+
+
+    <div
+        class="hero-buttons"
+        style="max-width: 1200px; margin: 0 auto 60px;"
+    >
+
+        <a href="/admin/add-movie">
+
+            <button
+                type="button"
+                class="admin-primary-button"
+            >
+                + Add Movie
+            </button>
+
+        </a>
+
+
+        <a href="/admin/add-show">
+
+            <button
+                type="button"
+                class="admin-secondary-button"
+            >
+                + Add Show
+            </button>
+
+        </a>
+
+    </div>
+
+
+
+    <!-- =================================================
+         MOVIES
+    ================================================== -->
+
+    <div class="admin-section-title">
+
+        <p>
+            MOVIE MANAGEMENT
+        </p>
+
+        <h2>
+            Movies
+        </h2>
+
+    </div>
+
+
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        ID
+                    </th>
+
+                    <th>
+                        POSTER
+                    </th>
+
+                    <th>
+                        TITLE
+                    </th>
+
+                    <th>
+                        GENRE
+                    </th>
+
+                    <th>
+                        LANGUAGE
+                    </th>
+
+                    <th>
+                        DURATION
+                    </th>
+
+                    <th>
+                        ACTIONS
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+
+                {% for movie in movies %}
+
+                <tr>
+
+
+                    <!-- ID -->
+
+                    <td>
+                        {{ movie['id'] }}
+                    </td>
+
+
+                    <!-- POSTER -->
+
+                    <td>
+
+                        {% if movie['poster'] %}
+
+                        <img
+                            src="{{ url_for(
+                                'static',
+                                filename='images/' + movie['poster']
+                            ) }}"
+                            alt="{{ movie['title'] }}"
+                            style="
+                                width: 55px;
+                                height: 75px;
+                                object-fit: cover;
+                                border-radius: 6px;
+                            "
+                        >
+
+                        {% else %}
+
+                        <span>
+                            No Poster
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <!-- TITLE -->
+
+                    <td class="table-movie-name">
+                        {{ movie['title'] }}
+                    </td>
+
+
+                    <!-- GENRE -->
+
+                    <td>
+                        {{ movie['genre'] }}
+                    </td>
+
+
+                    <!-- LANGUAGE -->
+
+                    <td>
+                        {{ movie['language'] }}
+                    </td>
+
+
+                    <!-- DURATION -->
+
+                    <td>
+                        {{ movie['duration'] }}
+                    </td>
+
+
+                    <!-- ACTIONS -->
+
+                    <td>
+
+                        <div
+                            style="
+                                display: flex;
+                                gap: 8px;
+                                align-items: center;
+                            "
+                        >
+
+
+                            <!-- EDIT BUTTON -->
+
+                            <a
+                                href="/admin/edit-movie/{{ movie['id'] }}"
+                            >
+
+                                <button
+                                    type="button"
+                                    class="admin-primary-button"
+                                >
+                                    Edit
+                                </button>
+
+                            </a>
+
+
+                            <!-- DELETE BUTTON -->
+
+                            <a
+                                href="/admin/delete-movie/{{ movie['id'] }}"
+                                onclick="return confirm(
+                                    'Are you sure you want to delete this movie?'
+                                );"
+                            >
+
+                                <button
+                                    type="button"
+                                    class="admin-secondary-button"
+                                >
+                                    Delete
+                                </button>
+
+                            </a>
+
+
+                        </div>
+
+                    </td>
+
+
+                </tr>
+
+                {% else %}
+
+                <tr>
+
+                    <td
+                        colspan="7"
+                        style="text-align: center;"
+                    >
+                        No movies available.
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+
+    <!-- =================================================
+         SHOWS
+    ================================================== -->
+
+    <div class="admin-section-title">
+
+        <p>
+            SHOW MANAGEMENT
+        </p>
+
+        <h2>
+            Shows
+        </h2>
+
+    </div>
+
+
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        ID
+                    </th>
+
+                    <th>
+                        MOVIE
+                    </th>
+
+                    <th>
+                        THEATRE
+                    </th>
+
+                    <th>
+                        DATE
+                    </th>
+
+                    <th>
+                        TIME
+                    </th>
+
+                    <th>
+                        PRICE
+                    </th>
+
+                    <th>
+                        ACTION
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+
+                {% for show in shows %}
+
+                <tr>
+
+
+                    <td>
+                        {{ show['id'] }}
+                    </td>
+
+
+                    <td class="table-movie-name">
+                        {{ show['title'] }}
+                    </td>
+
+
+                    <td>
+                        {{ show['theatre'] }}
+                    </td>
+
+
+                    <td>
+                        {{ show['show_date'] }}
+                    </td>
+
+
+                    <td>
+                        {{ show['show_time'] }}
+                    </td>
+
+
+                    <td class="table-price">
+                        ₹{{ show['price'] }}
+                    </td>
+
+
+                    <td>
+
+                        <a
+                            href="/admin/delete-show/{{ show['id'] }}"
+                            onclick="return confirm(
+                                'Are you sure you want to delete this show?'
+                            );"
+                        >
+
+                            <button
+                                type="button"
+                                class="admin-secondary-button"
+                            >
+                                Delete
+                            </button>
+
+                        </a>
+
+                    </td>
+
+
+                </tr>
+
+                {% else %}
+
+                <tr>
+
+                    <td
+                        colspan="7"
+                        style="text-align: center;"
+                    >
+                        No shows available.
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+
+    <!-- =================================================
+         USERS
+    ================================================== -->
+
+    <div class="admin-section-title">
+
+        <p>
+            USER MANAGEMENT
+        </p>
+
+        <h2>
+            Registered Users
+        </h2>
+
+    </div>
+
+
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        ID
+                    </th>
+
+                    <th>
+                        NAME
+                    </th>
+
+                    <th>
+                        EMAIL
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+
+                {% for user in users %}
+
+                <tr>
+
+                    <td>
+                        {{ user['id'] }}
+                    </td>
+
+                    <td class="table-movie-name">
+                        {{ user['name'] }}
+                    </td>
+
+                    <td>
+                        {{ user['email'] }}
+                    </td>
+
+                </tr>
+
+                {% else %}
+
+                <tr>
+
+                    <td
+                        colspan="3"
+                        style="text-align: center;"
+                    >
+                        No users registered.
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+
+    <!-- =================================================
+         BOOKINGS
+    ================================================== -->
+
+    <div class="admin-section-title">
+
+        <p>
+            BOOKING MANAGEMENT
+        </p>
+
+        <h2>
+            All Bookings
+        </h2>
+
+    </div>
+
+
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        BOOKING ID
+                    </th>
+
+                    <th>
+                        USER
+                    </th>
+
+                    <th>
+                        MOVIE
+                    </th>
+
+                    <th>
+                        THEATRE
+                    </th>
+
+                    <th>
+                        DATE
+                    </th>
+
+                    <th>
+                        TIME
+                    </th>
+
+                    <th>
+                        SEAT
+                    </th>
+
+                    <th>
+                        BOOKED ON
+                    </th>
+
+                    <th>
+                        ACTION
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+
+                {% for booking in bookings %}
+
+                <tr>
+
+
+                    <td>
+                        {{ booking['booking_id'] }}
+                    </td>
+
+
+                    <td>
+                        {{ booking['user_name'] }}
+                    </td>
+
+
+                    <td class="table-movie-name">
+                        {{ booking['movie_title'] }}
+                    </td>
+
+
+                    <td>
+                        {{ booking['theatre'] }}
+                    </td>
+
+
+                    <td>
+                        {{ booking['show_date'] }}
+                    </td>
+
+
+                    <td>
+                        {{ booking['show_time'] }}
+                    </td>
+
+
+                    <td class="table-seat">
+                        {{ booking['seat_number'] }}
+                    </td>
+
+
+                    <td>
+                        {{ booking['booking_date'] }}
+                    </td>
+
+
+                    <td>
+
+                        <a
+                            href="/admin/delete-booking/{{ booking['booking_id'] }}"
+                            onclick="return confirm(
+                                'Are you sure you want to delete this booking?'
+                            );"
+                        >
+
+                            <button
+                                type="button"
+                                class="admin-secondary-button"
+                            >
+                                Delete
+                            </button>
+
+                        </a>
+
+                    </td>
+
+
+                </tr>
+
+                {% else %}
+
+                <tr>
+
+                    <td
+                        colspan="9"
+                        style="text-align: center;"
+                    >
+                        No bookings available.
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+</section>
+
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer>
+
+    <h3>
+        🎬 MovieTicket
+    </h3>
+
+    <p>
+        Admin Dashboard
+    </p>
+
+    <p class="footer-copy">
+        © 2026 MovieTicket. All rights reserved.
+    </p>
+
+</footer>
+
+
+</body>
+
+</html>

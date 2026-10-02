@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>MovieTicket - Home</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+
+
+    <!-- ================= NAVBAR ================= -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            🎬 MovieTicket
+        </div>
+
+        <div class="nav-links">
+
+            <a href="/">
+                Home
+            </a>
+
+            <a href="/movies">
+                Movies
+            </a>
+
+            <a href="/shows">
+                Shows
+            </a>
+
+
+            {% if session.get("user_id") %}
+
+                <span class="welcome-user">
+                    Hi, {{ session.get("user_name") }}
+                </span>
+
+                <a href="/my-bookings">
+                    My Bookings
+                </a>
+
+                <a href="/logout">
+                    Logout
+                </a>
+
+
+            {% else %}
+
+                <a href="/login">
+                    Login
+                </a>
+
+                <a href="/register">
+                    Register
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- ================= HERO SECTION ================= -->
+
+    <section class="hero-section">
+
+        <div class="hero-content">
+
+            <p class="hero-small-title">
+                WELCOME TO MOVIETICKET
+            </p>
+
+            <h1>
+                Book Your Movie<br>
+                Tickets Easily
+            </h1>
+
+            <p class="hero-description">
+                Discover movies, choose your preferred show,
+                select your seats and book your tickets easily.
+            </p>
+
+
+            <div class="hero-buttons">
+
+                <a href="/movies">
+
+                    <button class="primary-button">
+                        Explore Movies
+                    </button>
+
+                </a>
+
+
+                {% if not session.get("user_id") %}
+
+                    <a href="/login">
+
+                        <button class="secondary-button">
+                            Login
+                        </button>
+
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ================= MOVIES SECTION ================= -->
+
+    <section class="movies-section">
+
+        <div class="section-heading">
+
+            <p class="hero-small-title">
+                NOW SHOWING
+            </p>
+
+            <h2>
+                Popular Movies
+            </h2>
+
+            <p>
+                Choose a movie and book your tickets.
+            </p>
+
+        </div>
+
+
+
+        <div class="movie-container">
+
+            {% for movie in movies %}
+
+                <div class="movie-card">
+
+
+                    <!-- MOVIE POSTER -->
+
+                    <div class="movie-poster">
+
+                        {% if movie["poster"] %}
+
+                            <img
+                                src="{{ url_for(
+                                    'static',
+                                    filename='images/' + movie['poster']
+                                ) }}"
+                                alt="{{ movie['title'] }} poster"
+                            >
+
+                        {% else %}
+
+                            <div class="poster-placeholder">
+
+                                <span>
+                                    {{ movie["title"] }}
+                                </span>
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+
+                    <!-- MOVIE INFORMATION -->
+
+                    <div class="movie-info">
+
+                        <h3>
+                            {{ movie["title"] }}
+                        </h3>
+
+
+                        <div class="movie-meta">
+
+                            <span>
+                                {{ movie["genre"] }}
+                            </span>
+
+                            <span>
+                                {{ movie["language"] }}
+                            </span>
+
+                        </div>
+
+
+                        <p class="movie-duration">
+                            {{ movie["duration"] }}
+                        </p>
+
+
+                        <p class="movie-description">
+                            {{ movie["description"] }}
+                        </p>
+
+
+                        <a href="/book-now/{{ movie['id'] }}">
+
+                            <button class="book-button">
+                                Book Now
+                            </button>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+            {% else %}
+
+                <p>
+                    No movies available currently.
+                </p>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer>
+
+        <h3>
+            🎬 MovieTicket
+        </h3>
+
+        <p>
+            Your simple movie ticket booking system.
+        </p>
+
+        <p class="footer-copy">
+            © 2026 MovieTicket. All rights reserved.
+        </p>
+
+    </footer>
+
+
+</body>
+
+</html>

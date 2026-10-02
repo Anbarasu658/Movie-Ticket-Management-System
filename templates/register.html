@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Register - MovieTicket</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+
+<body>
+
+
+    <!-- NAVIGATION -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            🎬 MovieTicket
+        </div>
+
+        <div class="nav-links">
+
+            <a href="/">
+                Home
+            </a>
+
+            <a href="/movies">
+                Movies
+            </a>
+
+            <a href="/shows">
+                Shows
+            </a>
+
+            <a href="/login">
+                Login
+            </a>
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- REGISTER PAGE -->
+
+    <section class="auth-section">
+
+
+        <div class="auth-card">
+
+
+            <div class="auth-icon">
+                👤
+            </div>
+
+
+            <p class="auth-small-title">
+                JOIN MOVIETICKET
+            </p>
+
+
+            <h1>
+                Create Account
+            </h1>
+
+
+            <p class="auth-description">
+                Create your account and start booking movie tickets.
+            </p>
+
+
+
+            <form method="POST">
+
+
+                <div class="input-group">
+
+                    <label>
+                        Full Name
+                    </label>
+
+                    <input
+                        type="text"
+                        name="name"
+                        placeholder="Enter your name"
+                        required
+                    >
+
+                </div>
+
+
+
+                <div class="input-group">
+
+                    <label>
+                        Email
+                    </label>
+
+                    <input
+                        type="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        required
+                    >
+
+                </div>
+
+
+
+                <div class="input-group">
+
+                    <label>
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        name="password"
+                        placeholder="Create a password"
+                        required
+                    >
+
+                </div>
+
+
+
+                <button
+                    type="submit"
+                    class="auth-button"
+                >
+                    Create Account
+                </button>
+
+
+            </form>
+
+
+
+            <div class="auth-footer">
+
+                <p>
+                    Already have an account?
+                </p>
+
+                <a href="/login">
+                    Login here
+                </a>
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- FOOTER -->
+
+    <footer>
+
+        <h3>
+            🎬 MovieTicket
+        </h3>
+
+        <p>
+            Your simple movie ticket booking system.
+        </p>
+
+        <p class="footer-copy">
+            © 2026 MovieTicket. All rights reserved.
+        </p>
+
+    </footer>
+
+
+</body>
+
+</html>

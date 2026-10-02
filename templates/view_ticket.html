@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Movie Ticket - MovieTicket</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+
+    <style>
+
+        /* =====================================================
+           TICKET PAGE
+        ===================================================== */
+
+        .ticket-page {
+            min-height: 70vh;
+            padding: 60px 20px;
+            background: #f5f6f8;
+        }
+
+
+        /* =====================================================
+           TICKET CONTAINER
+        ===================================================== */
+
+        .ticket-wrapper {
+            max-width: 850px;
+            margin: auto;
+        }
+
+
+        /* =====================================================
+           TICKET
+        ===================================================== */
+
+        .ticket {
+            background: #ffffff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+            border: 1px solid #e3e3e3;
+        }
+
+
+        /* =====================================================
+           TICKET HEADER
+        ===================================================== */
+
+        .ticket-header {
+            padding: 28px 35px;
+            background: #171717;
+            color: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .ticket-brand {
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .ticket-header-label {
+            font-size: 13px;
+            letter-spacing: 1.5px;
+            opacity: 0.75;
+            margin-top: 5px;
+        }
+
+        .ticket-confirmed {
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: #e8f7ed;
+            color: #188038;
+            font-size: 13px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+
+        /* =====================================================
+           MOVIE SECTION
+        ===================================================== */
+
+        .ticket-movie {
+            display: flex;
+            gap: 28px;
+            padding: 32px 35px;
+        }
+
+        .ticket-poster {
+            width: 160px;
+            min-width: 160px;
+            height: 225px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #eeeeee;
+        }
+
+        .ticket-poster img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .ticket-movie-info {
+            flex: 1;
+            padding-top: 5px;
+        }
+
+        .ticket-movie-info h1 {
+            margin: 0 0 8px;
+            font-size: 32px;
+            color: #171717 !important;
+        }
+
+        .ticket-movie-type {
+            color: #666666 !important;
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+
+
+        /* =====================================================
+           BOOKING ID
+        ===================================================== */
+
+        .ticket-booking-id {
+            display: inline-block;
+            padding: 8px 13px;
+            background: #f0f1f2;
+            color: #222222 !important;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+
+        /* =====================================================
+           DIVIDER
+        ===================================================== */
+
+        .ticket-divider {
+            border-top: 2px dashed #d9d9d9;
+            position: relative;
+        }
+
+        .ticket-divider::before,
+        .ticket-divider::after {
+            content: "";
+            position: absolute;
+            top: -12px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #f5f6f8;
+        }
+
+        .ticket-divider::before {
+            left: -12px;
+        }
+
+        .ticket-divider::after {
+            right: -12px;
+        }
+
+
+        /* =====================================================
+           INFORMATION
+        ===================================================== */
+
+        .ticket-information {
+            padding: 32px 35px;
+        }
+
+        .ticket-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .ticket-info-box {
+            background: #f3f4f6;
+            border: 1px solid #e0e2e5;
+            border-radius: 11px;
+            padding: 16px;
+        }
+
+        .ticket-info-label {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            color: #666666 !important;
+            font-weight: 700;
+            margin-bottom: 7px;
+        }
+
+        .ticket-info-value {
+            font-size: 17px;
+            font-weight: 800;
+            color: #171717 !important;
+        }
+
+
+        /* =====================================================
+           SEATS
+        ===================================================== */
+
+        .ticket-seats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .ticket-seat {
+            display: inline-block;
+            padding: 7px 12px;
+            background: #171717;
+            color: #ffffff !important;
+            border-radius: 7px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+
+        /* =====================================================
+           TOTAL
+        ===================================================== */
+
+        .ticket-total {
+            margin-top: 25px;
+            padding: 22px;
+            border-radius: 12px;
+            background: #171717;
+            color: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ticket-total-label {
+            font-size: 14px;
+            opacity: 0.75;
+        }
+
+        .ticket-total-amount {
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+
+        /* =====================================================
+           BOOKING DATE
+        ===================================================== */
+
+        .ticket-booking-date {
+            text-align: center;
+            padding: 22px 35px;
+            color: #666666 !important;
+            font-size: 13px;
+            border-top: 1px solid #eeeeee;
+        }
+
+
+        /* =====================================================
+           ACTION BUTTONS
+        ===================================================== */
+
+        .ticket-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .ticket-action-button {
+            display: inline-block;
+            padding: 12px 22px;
+            border-radius: 9px;
+            text-decoration: none !important;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+        }
+
+        .print-button {
+            background: #171717;
+            color: #ffffff !important;
+        }
+
+        .print-button:hover {
+            background: #333333;
+        }
+
+        .back-button {
+            background: #ffffff;
+            color: #222222 !important;
+            border: 1px solid #cccccc;
+        }
+
+        .back-button:hover {
+            background: #eeeeee;
+        }
+
+
+        /* =====================================================
+           PRINT STYLES
+        ===================================================== */
+
+        @media print {
+
+            body {
+                background: #ffffff !important;
+            }
+
+            .navbar,
+            footer,
+            .ticket-actions {
+                display: none !important;
+            }
+
+            .ticket-page {
+                padding: 0;
+                background: #ffffff !important;
+            }
+
+            .ticket-wrapper {
+                max-width: 100%;
+            }
+
+            .ticket {
+                box-shadow: none;
+                border: 1px solid #cccccc;
+            }
+
+            .ticket-divider::before,
+            .ticket-divider::after {
+                display: none;
+            }
+
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media (max-width: 700px) {
+
+            .ticket-page {
+                padding: 35px 15px;
+            }
+
+            .ticket-header {
+                padding: 22px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .ticket-movie {
+                padding: 25px;
+                flex-direction: column;
+            }
+
+            .ticket-poster {
+                width: 180px;
+                min-width: 180px;
+                height: 250px;
+                margin: auto;
+            }
+
+            .ticket-movie-info h1 {
+                font-size: 27px;
+            }
+
+            .ticket-information {
+                padding: 25px;
+            }
+
+            .ticket-info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .ticket-total {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .ticket-actions {
+                flex-direction: column;
+            }
+
+            .ticket-action-button {
+                width: 100%;
+                text-align: center;
+                box-sizing: border-box;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         NAVBAR
+    ===================================================== -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            🎬 MovieTicket
+        </div>
+
+        <div class="nav-links">
+
+            <a href="/">
+                Home
+            </a>
+
+            <a href="/movies">
+                Movies
+            </a>
+
+            <a href="/shows">
+                Shows
+            </a>
+
+            <a href="/my-bookings">
+                My Bookings
+            </a>
+
+            <span class="welcome-user">
+                Hi, {{ session.get("user_name") }}
+            </span>
+
+            <a href="/logout">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- =====================================================
+         TICKET PAGE
+    ===================================================== -->
+
+    <section class="ticket-page">
+
+        <div class="ticket-wrapper">
+
+
+            <!-- =================================================
+                 TICKET
+            ================================================= -->
+
+            <div class="ticket">
+
+
+                <!-- TICKET HEADER -->
+
+                <div class="ticket-header">
+
+                    <div>
+
+                        <div class="ticket-brand">
+                            🎬 MovieTicket
+                        </div>
+
+                        <div class="ticket-header-label">
+                            MOVIE TICKET
+                        </div>
+
+                    </div>
+
+
+                    <span class="ticket-confirmed">
+                        ✓ CONFIRMED
+                    </span>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     MOVIE INFORMATION
+                ================================================= -->
+
+                <div class="ticket-movie">
+
+
+                    <!-- POSTER -->
+
+                    <div class="ticket-poster">
+
+                        {% if booking['poster'] %}
+
+                            <img
+                                src="{{ url_for(
+                                    'static',
+                                    filename='images/' + booking['poster']
+                                ) }}"
+                                alt="{{ booking['movie_title'] }} poster"
+                            >
+
+                        {% endif %}
+
+                    </div>
+
+
+
+                    <!-- MOVIE DETAILS -->
+
+                    <div class="ticket-movie-info">
+
+                        <h1>
+                            {{ booking['movie_title'] }}
+                        </h1>
+
+                        <p class="ticket-movie-type">
+                            🎬 Movie Admission Ticket
+                        </p>
+
+                        <span class="ticket-booking-id">
+                            Booking #{{ booking['booking_id'] }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- DIVIDER -->
+
+                <div class="ticket-divider"></div>
+
+
+
+                <!-- =================================================
+                     TICKET INFORMATION
+                ================================================= -->
+
+                <div class="ticket-information">
+
+
+                    <div class="ticket-info-grid">
+
+
+                        <!-- THEATRE -->
+
+                        <div class="ticket-info-box">
+
+                            <span class="ticket-info-label">
+                                Theatre
+                            </span>
+
+                            <span class="ticket-info-value">
+                                {{ booking['theatre'] }}
+                            </span>
+
+                        </div>
+
+
+                        <!-- DATE -->
+
+                        <div class="ticket-info-box">
+
+                            <span class="ticket-info-label">
+                                Show Date
+                            </span>
+
+                            <span class="ticket-info-value">
+                                {{ booking['show_date'] }}
+                            </span>
+
+                        </div>
+
+
+                        <!-- TIME -->
+
+                        <div class="ticket-info-box">
+
+                            <span class="ticket-info-label">
+                                Show Time
+                            </span>
+
+                            <span class="ticket-info-value">
+                                {{ booking['show_time'] }}
+                            </span>
+
+                        </div>
+
+
+                        <!-- SEATS -->
+
+                        <div class="ticket-info-box">
+
+                            <span class="ticket-info-label">
+                                Seats
+                            </span>
+
+                            <div class="ticket-seats">
+
+                                {% for seat in seat_numbers %}
+
+                                    <span class="ticket-seat">
+                                        {{ seat }}
+                                    </span>
+
+                                {% endfor %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- TOTAL -->
+
+                    <div class="ticket-total">
+
+                        <div>
+
+                            <div class="ticket-total-label">
+                                Total Amount
+                            </div>
+
+                            <div class="ticket-total-amount">
+                                ₹{{ total_price }}
+                            </div>
+
+                        </div>
+
+                        <div>
+                            ✓ PAID
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     BOOKING DATE
+                ================================================= -->
+
+                <div class="ticket-booking-date">
+
+                    Booked on:
+                    {{ booking['booking_date'] }}
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- =================================================
+                 ACTION BUTTONS
+            ================================================= -->
+
+            <div class="ticket-actions">
+
+
+                <button
+                    onclick="window.print()"
+                    class="ticket-action-button print-button"
+                >
+                    🖨 Print Ticket
+                </button>
+
+
+                <a
+                    href="/my-bookings"
+                    class="ticket-action-button back-button"
+                >
+                    ← Back to My Bookings
+                </a>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         FOOTER
+    ===================================================== -->
+
+    <footer>
+
+        <h3>
+            🎬 MovieTicket
+        </h3>
+
+        <p>
+            Your simple movie ticket booking system.
+        </p>
+
+        <p class="footer-copy">
+            © 2026 MovieTicket. All rights reserved.
+        </p>
+
+    </footer>
+
+
+</body>
+
+</html>

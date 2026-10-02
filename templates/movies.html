@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Movies - MovieTicket</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+
+
+    <!-- ================= NAVBAR ================= -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            🎬 MovieTicket
+        </div>
+
+
+        <div class="nav-links">
+
+            <a href="/">
+                Home
+            </a>
+
+            <a href="/movies">
+                Movies
+            </a>
+
+            <a href="/shows">
+                Shows
+            </a>
+
+
+            {% if session.get("user_id") %}
+
+                <span class="welcome-user">
+                    Hi, {{ session.get("user_name") }}
+                </span>
+
+                <a href="/my-bookings">
+                    My Bookings
+                </a>
+
+                <a href="/logout">
+                    Logout
+                </a>
+
+
+            {% else %}
+
+                <a href="/login">
+                    Login
+                </a>
+
+                <a href="/register">
+                    Register
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- ================= PAGE HEADER ================= -->
+
+    <section class="movies-page-header">
+
+        <p class="hero-small-title">
+            MOVIETICKET
+        </p>
+
+        <h1>
+            Movies
+        </h1>
+
+        <p>
+            Choose your favorite movie and book your tickets.
+        </p>
+
+    </section>
+
+
+
+    <!-- ================= MOVIES ================= -->
+
+    <section class="movies-section">
+
+        <div class="movie-container">
+
+
+            {% for movie in movies %}
+
+                <div class="movie-card">
+
+
+                    <!-- MOVIE POSTER -->
+
+                    <div class="movie-poster">
+
+                        {% if movie["poster"] %}
+
+                            <img
+                                src="{{ url_for(
+                                    'static',
+                                    filename='images/' + movie['poster']
+                                ) }}"
+                                alt="{{ movie['title'] }} poster"
+                            >
+
+                        {% else %}
+
+                            <div class="poster-placeholder">
+
+                                <span>
+                                    {{ movie["title"] }}
+                                </span>
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+
+                    <!-- MOVIE INFORMATION -->
+
+                    <div class="movie-info">
+
+                        <h3>
+                            {{ movie["title"] }}
+                        </h3>
+
+
+                        <div class="movie-meta">
+
+                            <span>
+                                {{ movie["genre"] }}
+                            </span>
+
+                            <span>
+                                {{ movie["language"] }}
+                            </span>
+
+                        </div>
+
+
+                        <p class="movie-duration">
+                            {{ movie["duration"] }}
+                        </p>
+
+
+                        <p class="movie-description">
+                            {{ movie["description"] }}
+                        </p>
+
+
+                        <a href="/book-now/{{ movie['id'] }}">
+
+                            <button class="book-button">
+                                Book Now
+                            </button>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+            {% else %}
+
+                <p>
+                    No movies available currently.
+                </p>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer>
+
+        <h3>
+            🎬 MovieTicket
+        </h3>
+
+        <p>
+            Your simple movie ticket booking system.
+        </p>
+
+        <p class="footer-copy">
+            © 2026 MovieTicket. All rights reserved.
+        </p>
+
+    </footer>
+
+
+</body>
+
+</html>

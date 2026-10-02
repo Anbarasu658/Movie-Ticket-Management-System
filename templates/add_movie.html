@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Add Movie - MovieTicket</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+
+        <div class="logo">
+            🎬 MovieTicket
+        </div>
+
+        <div class="nav-links">
+            <a href="/admin">Admin Dashboard</a>
+            <a href="/admin-logout">Logout</a>
+        </div>
+
+    </nav>
+
+
+    <!-- Add Movie Section -->
+    <section class="form-section">
+
+        <div class="form-card">
+
+            <p class="hero-small-title">
+                ADMIN PANEL
+            </p>
+
+            <h1>Add New Movie</h1>
+
+            <p class="form-description">
+                Add a new movie and upload its poster.
+            </p>
+
+
+            <form method="POST"
+                  enctype="multipart/form-data">
+
+
+                <!-- Movie Title -->
+                <div class="form-group">
+
+                    <label for="title">
+                        Movie Title
+                    </label>
+
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        placeholder="Enter movie title"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- Genre -->
+                <div class="form-group">
+
+                    <label for="genre">
+                        Genre
+                    </label>
+
+                    <input
+                        type="text"
+                        id="genre"
+                        name="genre"
+                        placeholder="Example: Action / Drama"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- Language -->
+                <div class="form-group">
+
+                    <label for="language">
+                        Language
+                    </label>
+
+                    <input
+                        type="text"
+                        id="language"
+                        name="language"
+                        placeholder="Example: Tamil"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- Duration -->
+                <div class="form-group">
+
+                    <label for="duration">
+                        Duration
+                    </label>
+
+                    <input
+                        type="text"
+                        id="duration"
+                        name="duration"
+                        placeholder="Example: 2h 30m"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- Description -->
+                <div class="form-group">
+
+                    <label for="description">
+                        Description
+                    </label>
+
+                    <textarea
+                        id="description"
+                        name="description"
+                        rows="5"
+                        placeholder="Enter movie description"
+                        required
+                    ></textarea>
+
+                </div>
+
+
+                <!-- Poster -->
+                <div class="form-group">
+
+                    <label for="poster">
+                        Movie Poster
+                    </label>
+
+                    <input
+                        type="file"
+                        id="poster"
+                        name="poster"
+                        accept=".jpg,.jpeg,.png,.webp"
+                        required
+                    >
+
+                    <small>
+                        Allowed formats: JPG, JPEG, PNG, WEBP
+                    </small>
+
+                </div>
+
+
+                <!-- Buttons -->
+                <div class="form-actions">
+
+                    <button
+                        type="submit"
+                        class="primary-button">
+                        Add Movie
+                    </button>
+
+                    <a href="/admin">
+                        <button
+                            type="button"
+                            class="secondary-button">
+                            Cancel
+                        </button>
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+    <!-- Footer -->
+    <footer>
+
+        <h3>🎬 MovieTicket</h3>
+
+        <p>
+            Your simple movie ticket booking system.
+        </p>
+
+        <p class="footer-copy">
+            © 2026 MovieTicket. All rights reserved.
+        </p>
+
+    </footer>
+
+</body>
+</html>

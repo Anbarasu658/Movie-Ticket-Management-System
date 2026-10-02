@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Add Show - MovieTicket</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+
+
+    <!-- NAVIGATION -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            🎬 MovieTicket Admin
+        </div>
+
+        <div class="nav-links">
+
+            <a href="/">
+                Home
+            </a>
+
+            <a href="/admin">
+                Dashboard
+            </a>
+
+            <a href="/movies">
+                Movies
+            </a>
+
+            <a href="/admin-logout">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- PAGE HEADER -->
+
+    <section class="form-page-header">
+
+        <p class="hero-small-title">
+            SCHEDULE MANAGEMENT
+        </p>
+
+        <h1>
+            Add New Show
+        </h1>
+
+        <p>
+            Create a new movie show with theatre, date, time and price.
+        </p>
+
+    </section>
+
+
+
+    <!-- FORM -->
+
+    <section class="admin-form-section">
+
+        <div class="admin-form-card">
+
+
+            <div class="form-card-heading">
+
+                <div class="form-icon">
+                    🕐
+                </div>
+
+                <div>
+
+                    <p>
+                        SHOW DETAILS
+                    </p>
+
+                    <h2>
+                        Show Information
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+
+            <form method="POST">
+
+
+                <div class="form-grid">
+
+
+                    <!-- MOVIE -->
+
+                    <div class="form-group full-width">
+
+                        <label>
+                            Select Movie
+                        </label>
+
+                        <select
+                            name="movie_id"
+                            required
+                        >
+
+                            <option value="">
+                                Select a movie
+                            </option>
+
+                            {% for movie in movies %}
+
+                            <option value="{{ movie['id'] }}">
+
+                                {{ movie["title"] }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+
+                    <!-- THEATRE -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Theatre
+                        </label>
+
+                        <input
+                            type="text"
+                            name="theatre"
+                            placeholder="Example: PVR Cinemas"
+                            required
+                        >
+
+                    </div>
+
+
+
+                    <!-- DATE -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Show Date
+                        </label>
+
+                        <input
+                            type="date"
+                            name="show_date"
+                            required
+                        >
+
+                    </div>
+
+
+
+                    <!-- TIME -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Show Time
+                        </label>
+
+                        <input
+                            type="text"
+                            name="show_time"
+                            placeholder="Example: 6:30 PM"
+                            required
+                        >
+
+                    </div>
+
+
+
+                    <!-- PRICE -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Ticket Price
+                        </label>
+
+                        <div class="price-input">
+
+                            <span>
+                                ₹
+                            </span>
+
+                            <input
+                                type="number"
+                                name="price"
+                                placeholder="200"
+                                min="1"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- BUTTONS -->
+
+                <div class="form-actions">
+
+                    <a href="/admin">
+
+                        <button
+                            type="button"
+                            class="form-cancel-button"
+                        >
+                            Cancel
+                        </button>
+
+                    </a>
+
+
+                    <button
+                        type="submit"
+                        class="form-submit-button"
+                    >
+                        Add Show
+                    </button>
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- FOOTER -->
+
+    <footer>
+
+        <h3>
+            🎬 MovieTicket Admin
+        </h3>
+
+        <p>
+            Movie Ticket Management System
+        </p>
+
+        <p class="footer-copy">
+            © 2026 MovieTicket. All rights reserved.
+        </p>
+
+    </footer>
+
+
+</body>
+
+</html>

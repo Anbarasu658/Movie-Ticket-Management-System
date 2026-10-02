@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Select Seats - MovieTicket</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================
+         NAVIGATION
+    ========================== -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            🎬 MovieTicket
+        </div>
+
+        <div class="nav-links">
+
+            <a href="/">
+                Home
+            </a>
+
+            <a href="/movies">
+                Movies
+            </a>
+
+            <a href="/shows">
+                Shows
+            </a>
+
+            {% if session.get("user_id") %}
+
+                <span class="welcome-user">
+                    Hi, {{ session.get("user_name") }}
+                </span>
+
+                <a href="/logout">
+                    Logout
+                </a>
+
+            {% else %}
+
+                <a href="/login">
+                    Login
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- =========================
+         PAGE HEADER
+    ========================== -->
+
+    <section class="seat-page-header">
+
+        <p class="hero-small-title">
+            MOVIETICKET
+        </p>
+
+        <h1>
+            Select Your Seats
+        </h1>
+
+        <p>
+            Choose your preferred seats and continue with your booking.
+        </p>
+
+    </section>
+
+
+
+    <!-- =========================
+         SEAT BOOKING SECTION
+    ========================== -->
+
+    <section class="seat-section">
+
+
+        <!-- MOVIE DETAILS -->
+
+        <div class="seat-movie-card">
+
+            <div>
+
+                <p class="seat-label">
+                    MOVIE
+                </p>
+
+                <h2>
+                    {{ show["title"] }}
+                </h2>
+
+            </div>
+
+
+            <div>
+
+                <p class="seat-label">
+                    THEATRE
+                </p>
+
+                <strong>
+                    {{ show["theatre"] }}
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <p class="seat-label">
+                    DATE
+                </p>
+
+                <strong>
+                    {{ show["show_date"] }}
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <p class="seat-label">
+                    TIME
+                </p>
+
+                <strong>
+                    {{ show["show_time"] }}
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <p class="seat-label">
+                    PRICE
+                </p>
+
+                <strong class="seat-price">
+                    ₹{{ show["price"] }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- SCREEN -->
+
+        <div class="cinema-screen-container">
+
+            <div class="cinema-screen">
+                SCREEN
+            </div>
+
+            <p>
+                All eyes this way
+            </p>
+
+        </div>
+
+
+
+        <!-- LEGEND -->
+
+        <div class="seat-legend">
+
+            <div class="legend-item">
+
+                <span class="legend-seat available-seat"></span>
+
+                <span>
+                    Available
+                </span>
+
+            </div>
+
+
+            <div class="legend-item">
+
+                <span class="legend-seat selected-seat"></span>
+
+                <span>
+                    Selected
+                </span>
+
+            </div>
+
+
+            <div class="legend-item">
+
+                <span class="legend-seat booked-seat"></span>
+
+                <span>
+                    Booked
+                </span>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- SEAT FORM -->
+
+        <form method="POST">
+
+
+            <div class="cinema-seats">
+
+
+                {% for seat in seats %}
+
+
+                    {% if seat in booked_seats %}
+
+
+                        <label class="cinema-seat booked">
+
+                            <input
+                                type="checkbox"
+                                disabled
+                            >
+
+                            <span>
+                                {{ seat }}
+                            </span>
+
+                        </label>
+
+
+                    {% else %}
+
+
+                        <label class="cinema-seat">
+
+                            <input
+                                type="checkbox"
+                                name="seats"
+                                value="{{ seat }}"
+                            >
+
+                            <span>
+                                {{ seat }}
+                            </span>
+
+                        </label>
+
+
+                    {% endif %}
+
+
+                {% endfor %}
+
+
+            </div>
+
+
+
+            <!-- BOOKING ACTION -->
+
+            <div class="seat-action">
+
+                <p>
+                    Select one or more available seats.
+                </p>
+
+                <button
+                    type="submit"
+                    class="confirm-seat-button"
+                >
+                    Continue to Booking →
+                </button>
+
+            </div>
+
+
+        </form>
+
+
+    </section>
+
+
+
+    <!-- =========================
+         FOOTER
+    ========================== -->
+
+    <footer>
+
+        <h3>
+            🎬 MovieTicket
+        </h3>
+
+        <p>
+            Your simple movie ticket booking system.
+        </p>
+
+        <p class="footer-copy">
+            © 2026 MovieTicket. All rights reserved.
+        </p>
+
+    </footer>
+
+
+</body>
+
+</html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Booking Confirmed - MovieTicket</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================
+         NAVIGATION
+    ========================== -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            🎬 MovieTicket
+        </div>
+
+        <div class="nav-links">
+
+            <a href="/">
+                Home
+            </a>
+
+            <a href="/movies">
+                Movies
+            </a>
+
+            <a href="/shows">
+                Shows
+            </a>
+
+            {% if session.get("user_id") %}
+
+                <span class="welcome-user">
+                    Hi, {{ session.get("user_name") }}
+                </span>
+
+                <a href="/logout">
+                    Logout
+                </a>
+
+            {% else %}
+
+                <a href="/login">
+                    Login
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- =========================
+         CONFIRMATION HEADER
+    ========================== -->
+
+    <section class="confirmation-header">
+
+        <div class="success-icon">
+            ✓
+        </div>
+
+        <p class="hero-small-title">
+            MOVIETICKET
+        </p>
+
+        <h1>
+            Booking Confirmed
+        </h1>
+
+        <p>
+            Your movie tickets have been booked successfully.
+        </p>
+
+    </section>
+
+
+
+    <!-- =========================
+         TICKET SECTION
+    ========================== -->
+
+    <section class="ticket-section">
+
+
+        <div class="movie-ticket">
+
+
+            <!-- TICKET MAIN -->
+
+            <div class="ticket-main">
+
+
+                <div class="ticket-top">
+
+                    <div>
+
+                        <p class="ticket-label">
+                            MOVIE
+                        </p>
+
+                        <h2>
+                            {{ show["title"] }}
+                        </h2>
+
+                    </div>
+
+                    <div class="ticket-logo">
+                        🎬
+                    </div>
+
+                </div>
+
+
+
+                <div class="ticket-divider"></div>
+
+
+
+                <!-- TICKET DETAILS -->
+
+                <div class="ticket-details-grid">
+
+
+                    <div class="ticket-detail">
+
+                        <span>
+                            THEATRE
+                        </span>
+
+                        <strong>
+                            {{ show["theatre"] }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="ticket-detail">
+
+                        <span>
+                            DATE
+                        </span>
+
+                        <strong>
+                            {{ show["show_date"] }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="ticket-detail">
+
+                        <span>
+                            SHOW TIME
+                        </span>
+
+                        <strong>
+                            {{ show["show_time"] }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="ticket-detail">
+
+                        <span>
+                            TICKET PRICE
+                        </span>
+
+                        <strong>
+                            ₹{{ show["price"] }}
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <div class="ticket-divider"></div>
+
+
+
+                <!-- SEATS -->
+
+                <div class="ticket-seats">
+
+                    <div>
+
+                        <span>
+                            SEATS
+                        </span>
+
+                        <strong>
+
+                            {% for seat in selected_seats %}
+
+                                {{ seat }}
+
+                                {% if not loop.last %}
+                                    ,
+                                {% endif %}
+
+                            {% endfor %}
+
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            NUMBER OF SEATS
+                        </span>
+
+                        <strong>
+                            {{ selected_seats|length }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- TOTAL -->
+
+                <div class="ticket-total">
+
+                    <span>
+                        TOTAL AMOUNT
+                    </span>
+
+                    <strong>
+                        ₹{{ total_amount }}
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- TICKET SIDE -->
+
+            <div class="ticket-side">
+
+                <div class="ticket-side-content">
+
+                    <span>
+                        ADMIT
+                    </span>
+
+                    <strong>
+                        ONE
+                    </strong>
+
+                    <small>
+                        MOVIE TICKET
+                    </small>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- =========================
+             ACTION BUTTONS
+        ========================== -->
+
+        <div class="ticket-buttons">
+
+            <a href="/shows">
+
+                <button class="secondary-button">
+                    Book Another Ticket
+                </button>
+
+            </a>
+
+
+            <button
+                type="button"
+                class="primary-button"
+                onclick="window.print()"
+            >
+                Print Ticket
+            </button>
+
+        </div>
+
+
+        <p class="ticket-thank-you">
+            Thank you for booking with MovieTicket.
+        </p>
+
+
+    </section>
+
+
+
+    <!-- =========================
+         FOOTER
+    ========================== -->
+
+    <footer>
+
+        <h3>
+            🎬 MovieTicket
+        </h3>
+
+        <p>
+            Your simple movie ticket booking system.
+        </p>
+
+        <p class="footer-copy">
+            © 2026 MovieTicket. All rights reserved.
+        </p>
+
+    </footer>
+
+
+</body>
+
+</html>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Shows - MovieTicket</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================
+         NAVIGATION
+    ========================== -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            🎬 MovieTicket
+        </div>
+
+        <div class="nav-links">
+
+            <a href="/">
+                Home
+            </a>
+
+            <a href="/movies">
+                Movies
+            </a>
+
+            <a href="/shows">
+                Shows
+            </a>
+
+            {% if session.get("user_id") %}
+
+                <span class="welcome-user">
+                    Hi, {{ session.get("user_name") }}
+                </span>
+
+                <a href="/logout">
+                    Logout
+                </a>
+
+            {% else %}
+
+                <a href="/login">
+                    Login
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- =========================
+         SHOWS HEADER
+    ========================== -->
+
+    <section class="shows-page-header">
+
+        <p class="hero-small-title">
+            MOVIETICKET
+        </p>
+
+        {% if movie %}
+
+            <h1>
+                {{ movie["title"] }}
+            </h1>
+
+            <p>
+                Select your preferred theatre and show time.
+            </p>
+
+        {% else %}
+
+            <h1>
+                Available Shows
+            </h1>
+
+            <p>
+                Choose a movie show and continue to seat selection.
+            </p>
+
+        {% endif %}
+
+    </section>
+
+
+
+    <!-- =========================
+         SHOWS SECTION
+    ========================== -->
+
+    <section class="shows-section">
+
+        <div class="section-heading">
+
+            <p>
+                SHOWTIMES
+            </p>
+
+            {% if movie %}
+
+                <h2>
+                    {{ movie["title"] }} Shows
+                </h2>
+
+                <span>
+                    Select a show to continue booking.
+                </span>
+
+            {% else %}
+
+                <h2>
+                    All Available Shows
+                </h2>
+
+                <span>
+                    Select a show to continue booking.
+                </span>
+
+            {% endif %}
+
+        </div>
+
+
+
+        <div class="shows-container">
+
+
+            {% for show in shows %}
+
+
+            <div class="show-card">
+
+
+                <!-- MOVIE INFORMATION -->
+
+                <div class="show-movie-info">
+
+                    <div class="show-icon">
+                        🎬
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            {{ show["title"] }}
+                        </h3>
+
+                        <p>
+                            {{ show["genre"] }}
+                            <span>•</span>
+                            {{ show["language"] }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- SHOW DETAILS -->
+
+                <div class="show-details">
+
+                    <div class="show-detail">
+
+                        <span class="detail-label">
+                            THEATRE
+                        </span>
+
+                        <strong>
+                            {{ show["theatre"] }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="show-detail">
+
+                        <span class="detail-label">
+                            DATE
+                        </span>
+
+                        <strong>
+                            {{ show["show_date"] }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="show-detail">
+
+                        <span class="detail-label">
+                            TIME
+                        </span>
+
+                        <strong>
+                            {{ show["show_time"] }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="show-detail">
+
+                        <span class="detail-label">
+                            PRICE
+                        </span>
+
+                        <strong class="show-price">
+                            ₹{{ show["price"] }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- SELECT SEATS -->
+
+                <div class="show-action">
+
+                    <a href="/seats/{{ show['id'] }}">
+
+                        <button class="select-show-button">
+                            Select Seats →
+                        </button>
+
+                    </a>
+
+                </div>
+
+
+            </div>
+
+
+            {% else %}
+
+
+            <!-- NO SHOWS -->
+
+            <div class="no-shows">
+
+                <div class="no-shows-icon">
+                    🎬
+                </div>
+
+                <h3>
+                    No Shows Available
+                </h3>
+
+                <p>
+                    There are currently no shows available
+                    for this movie.
+                </p>
+
+                <a href="/movies">
+
+                    <button class="outline-button">
+                        Browse Movies
+                    </button>
+
+                </a>
+
+            </div>
+
+
+            {% endfor %}
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         FOOTER
+    ========================== -->
+
+    <footer>
+
+        <h3>
+            🎬 MovieTicket
+        </h3>
+
+        <p>
+            Your simple movie ticket booking system.
+        </p>
+
+        <p class="footer-copy">
+            © 2026 MovieTicket. All rights reserved.
+        </p>
+
+    </footer>
+
+
+</body>
+
+</html>

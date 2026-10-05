@@ -5,7 +5,8 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>Shows - MovieTicket</title>
 
@@ -42,7 +43,16 @@
                 Shows
             </a>
 
+
             {% if session.get("user_id") %}
+
+                <a href="/my-bookings">
+                    My Bookings
+                </a>
+
+                <a href="/profile">
+                    Profile
+                </a>
 
                 <span class="welcome-user">
                     Hi, {{ session.get("user_name") }}

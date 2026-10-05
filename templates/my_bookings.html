@@ -83,6 +83,16 @@
 
 
         /* =====================================================
+           CANCELLED BOOKING CARD
+        ===================================================== */
+
+        .booking-card.cancelled-card {
+            opacity: 0.88;
+            border: 1px solid #f0caca;
+        }
+
+
+        /* =====================================================
            POSTER
         ===================================================== */
 
@@ -161,6 +171,37 @@
 
 
         /* =====================================================
+           BOOKING REFERENCE
+        ===================================================== */
+
+        .booking-reference-display {
+            margin: 15px 0;
+            padding: 14px 16px;
+            background: #fff8d6;
+            border: 1px solid #ffcc00;
+            border-radius: 8px;
+        }
+
+        .booking-reference-display span {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #666666 !important;
+        }
+
+        .booking-reference-display strong {
+            display: block;
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #111111 !important;
+            word-break: break-word;
+        }
+
+
+        /* =====================================================
            BOOKING STATUS
         ===================================================== */
 
@@ -172,6 +213,16 @@
             color: #188038 !important;
             font-size: 13px;
             font-weight: 700;
+        }
+
+
+        /* =====================================================
+           CANCELLED STATUS
+        ===================================================== */
+
+        .booking-status.cancelled {
+            background: #fde8e8 !important;
+            color: #c62828 !important;
         }
 
 
@@ -276,10 +327,37 @@
             font-weight: 700;
             transition: 0.2s ease;
             white-space: nowrap;
+            border: none;
+            cursor: pointer;
         }
 
         .view-ticket-button:hover {
             background: #333333 !important;
+            transform: translateY(-1px);
+        }
+
+
+        /* =====================================================
+           CANCEL BOOKING BUTTON
+        ===================================================== */
+
+        .cancel-booking-button {
+            display: inline-block;
+            padding: 11px 18px;
+            background: #dc3545 !important;
+            color: #ffffff !important;
+            text-decoration: none !important;
+            border: none;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .cancel-booking-button:hover {
+            background: #b02a37 !important;
             transform: translateY(-1px);
         }
 
@@ -292,6 +370,46 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            flex-wrap: wrap;
+        }
+
+
+        /* =====================================================
+           CANCEL FORM
+        ===================================================== */
+
+        .cancel-booking-form {
+            margin: 0;
+            padding: 0;
+        }
+
+
+        /* =====================================================
+           CANCELLED INFORMATION
+        ===================================================== */
+
+        .cancelled-info {
+            margin-top: 20px;
+            padding: 14px 16px;
+            background: #fff0f0 !important;
+            border: 1px solid #f0caca;
+            border-radius: 10px;
+        }
+
+        .cancelled-info-label {
+            display: block;
+            font-size: 11px;
+            color: #a33a3a !important;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .cancelled-info-value {
+            color: #8b1e1e !important;
+            font-size: 15px;
+            font-weight: 700;
         }
 
 
@@ -380,10 +498,11 @@
             .booking-actions {
                 width: 100%;
                 flex-direction: column;
-                align-items: flex-start;
+                align-items: stretch;
             }
 
-            .view-ticket-button {
+            .view-ticket-button,
+            .cancel-booking-button {
                 width: 100%;
                 text-align: center;
                 box-sizing: border-box;
@@ -426,6 +545,10 @@
 
             <a href="/my-bookings">
                 My Bookings
+            </a>
+
+            <a href="/profile">
+                Profile
             </a>
 
             <span class="welcome-user">
@@ -486,7 +609,12 @@
                          BOOKING CARD
                     ================================================= -->
 
-                    <div class="booking-card">
+                    <div class="
+                        booking-card
+                        {% if booking['booking_status'] == 'Cancelled' %}
+                            cancelled-card
+                        {% endif %}
+                    ">
 
 
                         <!-- POSTER -->
@@ -551,13 +679,43 @@
 
 
 
-                            <!-- STATUS -->
+                            <!-- =================================================
+                                 BOOKING STATUS
+                            ================================================= -->
 
-                            <span class="booking-status">
+                            {% if booking['booking_status'] == 'Cancelled' %}
 
-                                ✓ Booking Confirmed
+                                <span class="booking-status cancelled">
 
-                            </span>
+                                    ✕ Booking Cancelled
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="booking-status">
+
+                                    ✓ Booking Confirmed
+
+                                </span>
+
+                            {% endif %}
+
+
+
+                            <!-- BOOKING REFERENCE -->
+
+                            <div class="booking-reference-display">
+
+                                <span>
+                                    BOOKING REFERENCE
+                                </span>
+
+                                <strong>
+                                    {{ booking['booking_reference'] }}
+                                </strong>
+
+                            </div>
 
 
 
@@ -666,6 +824,28 @@
 
 
                             <!-- =================================================
+                                 CANCELLED DATE
+                            ================================================= -->
+
+                            {% if booking['booking_status'] == 'Cancelled' %}
+
+                                <div class="cancelled-info">
+
+                                    <span class="cancelled-info-label">
+                                        Cancelled On
+                                    </span>
+
+                                    <span class="cancelled-info-value">
+                                        {{ booking['cancelled_at'] }}
+                                    </span>
+
+                                </div>
+
+                            {% endif %}
+
+
+
+                            <!-- =================================================
                                  BOTTOM ACTION AREA
                             ================================================= -->
 
@@ -691,17 +871,66 @@
 
                                 <div class="booking-actions">
 
-                                    <span class="booking-status">
-                                        CONFIRMED
-                                    </span>
+
+                                    {% if booking['booking_status'] == 'Cancelled' %}
+
+                                        <span class="booking-status cancelled">
+                                            CANCELLED
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="booking-status">
+                                            CONFIRMED
+                                        </span>
+
+                                    {% endif %}
 
 
-                                    <a
-                                        href="/view-ticket/{{ booking['booking_id'] }}"
-                                        class="view-ticket-button"
-                                    >
-                                        View Ticket
-                                    </a>
+
+                                    <!-- VIEW TICKET -->
+
+                                    {% if booking['booking_status'] != 'Cancelled' %}
+
+                                        <a
+                                            href="/view-ticket/{{ booking['booking_id'] }}"
+                                            class="view-ticket-button"
+                                        >
+                                            View Ticket
+                                        </a>
+
+                                    {% endif %}
+
+
+
+                                    <!-- CANCEL BOOKING -->
+
+                                    {% if booking['booking_status'] != 'Cancelled' %}
+
+                                        <form
+                                            action="/cancel-booking/{{ booking['booking_id'] }}"
+                                            method="POST"
+                                            class="cancel-booking-form"
+                                            onsubmit="return confirmCancelBooking();"
+                                        >
+
+                                            <input
+                                                type="hidden"
+                                                name="csrf_token"
+                                                value="{{ csrf_token() }}"
+                                            >
+
+                                            <button
+                                                type="submit"
+                                                class="cancel-booking-button"
+                                            >
+                                                Cancel Booking
+                                            </button>
+
+                                        </form>
+
+                                    {% endif %}
+
 
                                 </div>
 
@@ -777,6 +1006,25 @@
         </p>
 
     </footer>
+
+
+
+    <!-- =====================================================
+         CANCEL CONFIRMATION
+    ===================================================== -->
+
+    <script>
+
+        function confirmCancelBooking() {
+
+            return confirm(
+                "Are you sure you want to cancel this booking?\n\n" +
+                "All seats associated with this booking will be cancelled."
+            );
+
+        }
+
+    </script>
 
 
 </body>

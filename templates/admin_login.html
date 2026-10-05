@@ -5,105 +5,300 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Admin Login - MovieTicket</title>
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <style>
+
+        /* =====================================================
+           ADMIN LOGIN PAGE
+        ===================================================== */
+
+        .admin-login-page {
+            min-height: calc(100vh - 80px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 20px;
+        }
+
+
+        .admin-login-wrapper {
+            width: 100%;
+            max-width: 450px;
+        }
+
+
+        .admin-auth-card {
+            width: 100%;
+            padding: 45px 40px;
+            border-radius: 18px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+
+        .admin-icon {
+            width: 75px;
+            height: 75px;
+            margin: 0 auto 22px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            font-size: 30px;
+
+            background: rgba(255, 204, 0, 0.12);
+            border: 1px solid rgba(255, 204, 0, 0.35);
+        }
+
+
+        .admin-auth-card h1 {
+            margin-bottom: 12px;
+        }
+
+
+        .admin-auth-description {
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+
+        .admin-login-form {
+            text-align: left;
+        }
+
+
+        .admin-login-form .input-group {
+            margin-bottom: 22px;
+        }
+
+
+        .admin-login-form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+
+        .admin-login-form input {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+
+        .admin-login-button {
+            width: 100%;
+            margin-top: 8px;
+            padding: 14px 20px;
+
+            border: none;
+            border-radius: 8px;
+
+            background: #ffcc00;
+            color: #111;
+
+            font-size: 16px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition:
+                transform 0.2s ease,
+                opacity 0.2s ease;
+        }
+
+
+        .admin-login-button:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+
+        .admin-access-badge {
+            margin-top: 28px;
+            padding: 12px 15px;
+
+            border-radius: 8px;
+
+            background: rgba(255, 204, 0, 0.08);
+            border: 1px solid rgba(255, 204, 0, 0.2);
+
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+
+            text-align: center;
+        }
+
+
+        .admin-back-link {
+            display: block;
+            margin-top: 22px;
+
+            text-decoration: none;
+
+            font-size: 14px;
+        }
+
+
+        .admin-back-link:hover {
+            text-decoration: underline;
+        }
+
+
+        @media (max-width: 600px) {
+
+            .admin-login-page {
+                padding: 35px 15px;
+            }
+
+            .admin-auth-card {
+                padding: 35px 25px;
+            }
+
+        }
+
+    </style>
 
 </head>
+
 
 <body>
 
 
-    <!-- NAVIGATION -->
+<!-- =====================================================
+     NAVIGATION
+===================================================== -->
 
-    <nav class="navbar">
+<nav class="navbar">
 
-        <div class="logo">
-            🎬 MovieTicket Admin
-        </div>
-
-        <div class="nav-links">
-
-            <a href="/">
-                Home
-            </a>
-
-            <a href="/movies">
-                Movies
-            </a>
-
-            <a href="/login">
-                User Login
-            </a>
-
-        </div>
-
-    </nav>
+    <div class="logo">
+        🎬 MovieTicket Admin
+    </div>
 
 
+    <div class="nav-links">
 
-    <!-- ADMIN LOGIN -->
+        <a href="/">
+            Home
+        </a>
 
-    <section class="admin-auth-section">
+        <a href="/movies">
+            Movies
+        </a>
+
+        <a href="/login">
+            User Login
+        </a>
+
+    </div>
+
+</nav>
+
+
+
+<!-- =====================================================
+     ADMIN LOGIN
+===================================================== -->
+
+<section class="admin-login-page">
+
+    <div class="admin-login-wrapper">
 
         <div class="admin-auth-card">
 
+
+            <!-- ADMIN ICON -->
 
             <div class="admin-icon">
                 ⚙
             </div>
 
 
+            <!-- TITLE -->
+
             <p class="auth-small-title">
-                MANAGEMENT PANEL
+                SECURE MANAGEMENT PANEL
             </p>
 
 
             <h1>
-                Admin Login
+                Administrator Login
             </h1>
 
 
-            <p class="auth-description">
-                Login to manage movies, shows, users and bookings.
+            <p class="admin-auth-description">
+                Authorized administrators can manage movies,
+                shows, screens, users and bookings.
             </p>
 
 
 
-            <form method="POST">
+            <!-- LOGIN FORM -->
 
+            <form
+                method="POST"
+                class="admin-login-form"
+            >
+
+                <!-- CSRF PROTECTION -->
+
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                >
+
+
+                <!-- USERNAME -->
 
                 <div class="input-group">
 
-                    <label>
-                        Username
+                    <label for="username">
+                        Admin Username
                     </label>
 
                     <input
+                        id="username"
                         type="text"
                         name="username"
                         placeholder="Enter admin username"
+                        autocomplete="username"
+                        maxlength="50"
                         required
                     >
 
                 </div>
 
 
+
+                <!-- PASSWORD -->
 
                 <div class="input-group">
 
-                    <label>
-                        Password
+                    <label for="password">
+                        Admin Password
                     </label>
 
                     <input
+                        id="password"
                         type="password"
                         name="password"
                         placeholder="Enter admin password"
+                        autocomplete="current-password"
                         required
                     >
 
@@ -111,47 +306,65 @@
 
 
 
+                <!-- LOGIN BUTTON -->
+
                 <button
                     type="submit"
-                    class="auth-button"
+                    class="admin-login-button"
                 >
-                    Admin Login
+                    Login to Admin Panel
                 </button>
 
 
             </form>
 
 
-            <div class="admin-login-note">
 
-                <span>
-                    ADMIN ACCESS ONLY
-                </span>
+            <!-- ADMIN ACCESS NOTICE -->
 
+            <div class="admin-access-badge">
+                ADMIN ACCESS ONLY
             </div>
+
+
+
+            <!-- BACK TO WEBSITE -->
+
+            <a
+                href="/"
+                class="admin-back-link"
+            >
+                ← Back to MovieTicket
+            </a>
 
 
         </div>
 
-    </section>
+    </div>
+
+</section>
 
 
 
-    <footer>
+<!-- =====================================================
+     FOOTER
+===================================================== -->
 
-        <h3>
-            🎬 MovieTicket
-        </h3>
+<footer>
 
-        <p>
-            Movie Ticket Management System
-        </p>
+    <h3>
+        🎬 MovieTicket
+    </h3>
 
-        <p class="footer-copy">
-            © 2026 MovieTicket. All rights reserved.
-        </p>
+    <p>
+        Movie Ticket Management System
+    </p>
 
-    </footer>
+    <p class="footer-copy">
+        © 2026 MovieTicket. All rights reserved.
+    </p>
+
+</footer>
 
 
 </body>

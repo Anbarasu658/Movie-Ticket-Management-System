@@ -143,6 +143,24 @@
             border-radius: 8px;
             font-size: 13px;
             font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+
+        /* =====================================================
+           BOOKING REFERENCE
+        ===================================================== */
+
+        .ticket-booking-reference {
+            display: inline-block;
+            padding: 9px 13px;
+            background: #fff8d9;
+            color: #171717 !important;
+            border: 1px solid #ead98a;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
         }
 
 
@@ -261,6 +279,54 @@
 
 
         /* =====================================================
+           QR CODE SECTION
+        ===================================================== */
+
+        .ticket-qr-section {
+            margin-top: 30px;
+            padding: 30px 20px;
+            text-align: center;
+            background: #f8f9fa;
+            border: 1px solid #e0e2e5;
+            border-radius: 14px;
+        }
+
+        .ticket-qr-title {
+            margin: 0 0 8px;
+            font-size: 17px;
+            font-weight: 800;
+            color: #171717 !important;
+            letter-spacing: 0.8px;
+        }
+
+        .ticket-qr-description {
+            margin: 0 0 20px;
+            font-size: 13px;
+            color: #666666 !important;
+        }
+
+        .ticket-qr-code {
+            width: 180px;
+            height: 180px;
+            padding: 10px;
+            background: #ffffff;
+            border: 1px solid #dddddd;
+            border-radius: 10px;
+            object-fit: contain;
+        }
+
+        .ticket-qr-reference {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #555555 !important;
+        }
+
+        .ticket-qr-reference strong {
+            color: #171717 !important;
+        }
+
+
+        /* =====================================================
            BOOKING DATE
         ===================================================== */
 
@@ -350,6 +416,10 @@
                 display: none;
             }
 
+            .ticket-qr-section {
+                page-break-inside: avoid;
+            }
+
         }
 
 
@@ -407,6 +477,11 @@
                 width: 100%;
                 text-align: center;
                 box-sizing: border-box;
+            }
+
+            .ticket-qr-code {
+                width: 160px;
+                height: 160px;
             }
 
         }
@@ -545,6 +620,13 @@
                             Booking #{{ booking['booking_id'] }}
                         </span>
 
+                        <br>
+
+                        <span class="ticket-booking-reference">
+                            Booking Reference:
+                            {{ booking['booking_reference'] }}
+                        </span>
+
                     </div>
 
                 </div>
@@ -577,6 +659,21 @@
 
                             <span class="ticket-info-value">
                                 {{ booking['theatre'] }}
+                            </span>
+
+                        </div>
+
+
+                        <!-- SCREEN -->
+
+                        <div class="ticket-info-box">
+
+                            <span class="ticket-info-label">
+                                Screen
+                            </span>
+
+                            <span class="ticket-info-value">
+                                {{ booking['screen'] }}
                             </span>
 
                         </div>
@@ -649,7 +746,7 @@
                             </div>
 
                             <div class="ticket-total-amount">
-                                ₹{{ total_price }}
+                                ₹{{ "%.2f"|format(total_price|float) }}
                             </div>
 
                         </div>
@@ -659,6 +756,44 @@
                         </div>
 
                     </div>
+
+
+
+                    <!-- =================================================
+                         QR CODE
+                    ================================================= -->
+
+                    <div class="ticket-qr-section">
+
+                        <h3 class="ticket-qr-title">
+                            SCAN TO VERIFY TICKET
+                        </h3>
+
+                        <p class="ticket-qr-description">
+                            Scan this QR code to view the ticket details.
+                        </p>
+
+                        <img
+                            src="{{ url_for(
+                                'static',
+                                filename='qr_codes/' + qr_filename
+                            ) }}"
+                            alt="Ticket QR Code"
+                            class="ticket-qr-code"
+                        >
+
+                        <div class="ticket-qr-reference">
+
+                            Booking Reference:
+
+                            <strong>
+                                {{ booking['booking_reference'] }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
 
                 </div>
 
@@ -701,6 +836,7 @@
                 >
                     ← Back to My Bookings
                 </a>
+
 
             </div>
 

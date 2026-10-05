@@ -5,42 +5,43 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <title>Add Show - MovieTicket</title>
+    <title>Add Show - Movie Ticket Management</title>
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
 
 </head>
 
 <body>
 
-
-    <!-- NAVIGATION -->
+    <!-- ==============================
+         ADMIN NAVBAR
+    =============================== -->
 
     <nav class="navbar">
 
-        <div class="logo">
-            🎬 MovieTicket Admin
+        <div class="nav-logo">
+            Movie Ticket Management
         </div>
 
         <div class="nav-links">
-
-            <a href="/">
-                Home
-            </a>
 
             <a href="/admin">
                 Dashboard
             </a>
 
-            <a href="/movies">
-                Movies
+            <a href="/admin/screens">
+                Manage Screens
             </a>
 
-            <a href="/admin-logout">
+            <a href="/admin/logout">
                 Logout
             </a>
 
@@ -49,235 +50,210 @@
     </nav>
 
 
+    <!-- ==============================
+         MAIN CONTENT
+    =============================== -->
 
-    <!-- PAGE HEADER -->
+    <main class="admin-container">
 
-    <section class="form-page-header">
+        <div class="admin-header">
 
-        <p class="hero-small-title">
-            SCHEDULE MANAGEMENT
-        </p>
+            <h1>
+                Add New Show
+            </h1>
 
-        <h1>
-            Add New Show
-        </h1>
+            <p>
+                Create a new movie show using a managed theatre screen.
+            </p>
 
-        <p>
-            Create a new movie show with theatre, date, time and price.
-        </p>
-
-    </section>
-
+        </div>
 
 
-    <!-- FORM -->
+        <!-- ==============================
+             FORM
+        =============================== -->
 
-    <section class="admin-form-section">
+        <div class="admin-card">
 
-        <div class="admin-form-card">
+            <form
+                method="POST"
+                action="/admin/add-show"
+            >
 
+                <!-- CSRF Protection -->
 
-            <div class="form-card-heading">
-
-                <div class="form-icon">
-                    🕐
-                </div>
-
-                <div>
-
-                    <p>
-                        SHOW DETAILS
-                    </p>
-
-                    <h2>
-                        Show Information
-                    </h2>
-
-                </div>
-
-            </div>
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                >
 
 
+                <!-- MOVIE -->
 
-            <form method="POST">
+                <div class="form-group">
 
+                    <label for="movie_id">
+                        Movie
+                    </label>
 
-                <div class="form-grid">
+                    <select
+                        id="movie_id"
+                        name="movie_id"
+                        required
+                    >
 
+                        <option value="">
+                            -- Select Movie --
+                        </option>
 
-                    <!-- MOVIE -->
-
-                    <div class="form-group full-width">
-
-                        <label>
-                            Select Movie
-                        </label>
-
-                        <select
-                            name="movie_id"
-                            required
-                        >
-
-                            <option value="">
-                                Select a movie
-                            </option>
-
-                            {% for movie in movies %}
+                        {% for movie in movies %}
 
                             <option value="{{ movie['id'] }}">
 
-                                {{ movie["title"] }}
+                                {{ movie['title'] }}
 
                             </option>
 
-                            {% endfor %}
+                        {% endfor %}
 
-                        </select>
-
-                    </div>
-
-
-
-                    <!-- THEATRE -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Theatre
-                        </label>
-
-                        <input
-                            type="text"
-                            name="theatre"
-                            placeholder="Example: PVR Cinemas"
-                            required
-                        >
-
-                    </div>
-
-
-
-                    <!-- DATE -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Show Date
-                        </label>
-
-                        <input
-                            type="date"
-                            name="show_date"
-                            required
-                        >
-
-                    </div>
-
-
-
-                    <!-- TIME -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Show Time
-                        </label>
-
-                        <input
-                            type="text"
-                            name="show_time"
-                            placeholder="Example: 6:30 PM"
-                            required
-                        >
-
-                    </div>
-
-
-
-                    <!-- PRICE -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Ticket Price
-                        </label>
-
-                        <div class="price-input">
-
-                            <span>
-                                ₹
-                            </span>
-
-                            <input
-                                type="number"
-                                name="price"
-                                placeholder="200"
-                                min="1"
-                                required
-                            >
-
-                        </div>
-
-                    </div>
-
+                    </select>
 
                 </div>
 
+
+                <!-- SCREEN -->
+
+                <div class="form-group">
+
+                    <label for="screen_id">
+                        Theatre / Screen
+                    </label>
+
+                    <select
+                        id="screen_id"
+                        name="screen_id"
+                        required
+                    >
+
+                        <option value="">
+                            -- Select Theatre / Screen --
+                        </option>
+
+                        {% for screen in screens %}
+
+                            <option value="{{ screen['id'] }}">
+
+                                {{ screen['theatre'] }}
+                                —
+                                {{ screen['screen_name'] }}
+                                ({{ screen['capacity'] }} seats)
+
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <!-- SHOW DATE -->
+
+                <div class="form-group">
+
+                    <label for="show_date">
+                        Show Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="show_date"
+                        name="show_date"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- SHOW TIME -->
+
+                <div class="form-group">
+
+                    <label for="show_time">
+                        Show Time
+                    </label>
+
+                    <input
+                        type="time"
+                        id="show_time"
+                        name="show_time"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- PRICE -->
+
+                <div class="form-group">
+
+                    <label for="price">
+                        Ticket Price (₹)
+                    </label>
+
+                    <input
+                        type="number"
+                        id="price"
+                        name="price"
+                        min="1"
+                        max="10000"
+                        step="0.01"
+                        placeholder="Example: 180"
+                        required
+                    >
+
+                </div>
 
 
                 <!-- BUTTONS -->
 
                 <div class="form-actions">
 
-                    <a href="/admin">
-
-                        <button
-                            type="button"
-                            class="form-cancel-button"
-                        >
-                            Cancel
-                        </button>
-
-                    </a>
-
-
                     <button
                         type="submit"
-                        class="form-submit-button"
+                        class="admin-primary-button"
                     >
                         Add Show
                     </button>
 
-                </div>
+                    <a
+                        href="/admin"
+                        class="admin-secondary-button"
+                    >
+                        Cancel
+                    </a>
 
+                </div>
 
             </form>
 
-
         </div>
 
-    </section>
+    </main>
 
 
+    <!-- ==============================
+         FOOTER
+    =============================== -->
 
-    <!-- FOOTER -->
-
-    <footer>
-
-        <h3>
-            🎬 MovieTicket Admin
-        </h3>
+    <footer class="site-footer">
 
         <p>
-            Movie Ticket Management System
-        </p>
-
-        <p class="footer-copy">
-            © 2026 MovieTicket. All rights reserved.
+            © 2026 Movie Ticket Management System
         </p>
 
     </footer>
-
 
 </body>
 

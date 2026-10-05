@@ -1,15 +1,19 @@
 import os
 import uuid
 import re
+import random
+import string
+import qrcode
 
+from flask_wtf.csrf import CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from dotenv import load_dotenv
 from functools import wraps
-
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, jsonify
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.exceptions import RequestEntityTooLarge
-
 from database import get_db_connection
 from datetime import datetime
 
@@ -32,11 +36,60 @@ app = Flask(__name__)
 # FLASK SESSION SECRET KEY
 # ============================================================
 
-app.secret_key = os.getenv(
-    "SECRET_KEY",
-    "temporary-development-key"
+app.secret_key = os.getenv("SECRET_KEY")
+
+if not app.secret_key:
+    raise RuntimeError(
+        "SECRET_KEY is not configured. Please add SECRET_KEY to the .env file."
+    )
+
+
+# ============================================================
+# SESSION COOKIE SECURITY
+# ============================================================
+
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+
+
+# ============================================================
+# CSRF PROTECTION
+# ============================================================
+
+csrf = CSRFProtect(app)
+
+
+# ============================================================
+# RATE LIMITING
+# ============================================================
+
+limiter = Limiter(
+    key_func=get_remote_address,
+    app=app,
+    default_limits=[]
 )
 
+
+# ============================================================
+# GENERATE BOOKING REFERENCE
+# ============================================================
+
+def generate_booking_reference():
+
+    characters = string.ascii_uppercase + string.digits
+
+    random_code = "".join(
+        random.choices(characters, k=6)
+    )
+
+    date_part = datetime.now().strftime("%Y%m%d")
+
+    return f"MTM-{date_part}-{random_code}"
+
+
+# ============================================================
+# ADMIN REQUIRED DECORATOR
+# ============================================================
 
 def admin_required(function):
 
@@ -55,10 +108,9 @@ def admin_required(function):
 # ADMIN LOGIN SETTINGS
 # ============================================================
 
-ADMIN_USERNAME = "admin"
-
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
 ADMIN_PASSWORD_HASH = generate_password_hash(
-    "admin123"
+    os.getenv("ADMIN_PASSWORD")
 )
 
 
@@ -132,7 +184,7 @@ def home():
 
 
 # ============================================================
-# MOVIES PAGE
+# MOVIES PAGE - SEARCH AND FILTERS
 # ============================================================
 
 @app.route("/movies")
@@ -140,17 +192,146 @@ def movies():
 
     connection = get_db_connection()
 
-    movies = connection.execute("""
+    # Get search and filter values
+    search_query = request.args.get("q", "").strip()
+
+    selected_genre = request.args.get(
+        "genre",
+        ""
+    ).strip()
+
+    selected_language = request.args.get(
+        "language",
+        ""
+    ).strip()
+
+    # Build SQL query safely
+    query = """
         SELECT *
         FROM movies
+        WHERE 1 = 1
+    """
+
+    parameters = []
+
+    # Search by movie title or description
+    if search_query:
+
+        query += """
+            AND (
+                title LIKE %s
+                OR description LIKE %s
+            )
+        """
+
+        search_value = f"%{search_query}%"
+
+        parameters.extend([
+            search_value,
+            search_value
+        ])
+
+    # Filter by genre
+    if selected_genre:
+
+        query += """
+            AND genre = %s
+        """
+
+        parameters.append(selected_genre)
+
+    # Filter by language
+    if selected_language:
+
+        query += """
+            AND language = %s
+        """
+
+        parameters.append(selected_language)
+
+    query += """
         ORDER BY id DESC
+    """
+
+    # Get filtered movies
+    movies = connection.execute(
+        query,
+        parameters
+    ).fetchall()
+
+    # Get available genres
+    genres = connection.execute("""
+        SELECT DISTINCT genre
+        FROM movies
+        WHERE genre IS NOT NULL
+        AND TRIM(genre) != ''
+        ORDER BY genre
+    """).fetchall()
+
+    # Get available languages
+    languages = connection.execute("""
+        SELECT DISTINCT language
+        FROM movies
+        WHERE language IS NOT NULL
+        AND TRIM(language) != ''
+        ORDER BY language
     """).fetchall()
 
     connection.close()
 
     return render_template(
         "movies.html",
-        movies=movies
+        movies=movies,
+        genres=genres,
+        languages=languages,
+        search_query=search_query,
+        selected_genre=selected_genre,
+        selected_language=selected_language
+    )
+
+
+# ============================================================
+# MOVIE DETAILS
+# ============================================================
+
+@app.route("/movie/<int:movie_id>")
+def movie_details(movie_id):
+
+    connection = get_db_connection()
+
+    # Get movie details
+    movie = connection.execute("""
+        SELECT *
+        FROM movies
+        WHERE id = %s
+    """, (
+        movie_id,
+    )).fetchone()
+
+    # Get available shows for this movie
+    shows = connection.execute("""
+        SELECT *
+        FROM shows
+        WHERE movie_id = %s
+        ORDER BY show_date, show_time
+    """, (
+        movie_id,
+    )).fetchall()
+
+    connection.close()
+
+    # Movie does not exist
+    if movie is None:
+
+        return render_template(
+            "error.html",
+            message="Movie not found."
+        )
+
+    return render_template(
+        "movie_details.html",
+        movie=movie,
+        shows=shows
     )
 
 
@@ -166,8 +347,10 @@ def book_now(movie_id):
     movie = connection.execute("""
         SELECT *
         FROM movies
-        WHERE id = ?
-    """, (movie_id,)).fetchone()
+        WHERE id = %s
+    """, (
+        movie_id,
+    )).fetchone()
 
     connection.close()
 
@@ -183,7 +366,6 @@ def book_now(movie_id):
 
     # User is not logged in
     if "user_id" not in session:
-
         return redirect("/login")
 
     # User is already logged in
@@ -213,7 +395,7 @@ def shows():
             FROM shows
             JOIN movies
                 ON shows.movie_id = movies.id
-            WHERE shows.movie_id = ?
+            WHERE shows.movie_id = %s
             ORDER BY
                 shows.show_date,
                 shows.show_time
@@ -257,7 +439,11 @@ def register():
     if request.method == "POST":
 
         name = request.form["name"].strip()
-        email = request.form["email"].strip().lower()
+
+        email = request.form[
+            "email"
+        ].strip().lower()
+
         password = request.form["password"]
 
         # ----------------------------------------------------
@@ -318,7 +504,7 @@ def register():
         existing_user = connection.execute("""
             SELECT id
             FROM users
-            WHERE email = ?
+            WHERE email = %s
         """, (
             email,
         )).fetchone()
@@ -351,7 +537,7 @@ def register():
                 email,
                 password
             )
-            VALUES (?, ?, ?)
+            VALUES (%s, %s, %s)
         """, (
             name,
             email,
@@ -376,19 +562,25 @@ def register():
     "/login",
     methods=["GET", "POST"]
 )
+@limiter.limit("5 per minute")
 def login():
 
     if request.method == "POST":
 
-        email = request.form["email"].strip().lower()
-        password = request.form["password"]
+        email = request.form[
+            "email"
+        ].strip().lower()
+
+        password = request.form[
+            "password"
+        ]
 
         connection = get_db_connection()
 
         user = connection.execute("""
             SELECT *
             FROM users
-            WHERE email = ?
+            WHERE email = %s
         """, (
             email,
         )).fetchone()
@@ -444,8 +636,8 @@ def login():
 
                 connection.execute("""
                     UPDATE users
-                    SET password = ?
-                    WHERE id = ?
+                    SET password = %s
+                    WHERE id = %s
                 """, (
                     new_hashed_password,
                     user["id"]
@@ -471,9 +663,7 @@ def login():
         # ----------------------------------------------------
 
         session["user_id"] = user["id"]
-
         session["user_name"] = user["name"]
-
         session["user_email"] = user["email"]
 
         connection.close()
@@ -503,24 +693,27 @@ def login():
 def seats(show_id):
 
     if "user_id" not in session:
-
         return redirect("/login")
 
     connection = get_db_connection()
 
     # --------------------------------------------------------
-    # GET SHOW
+    # GET SHOW + SCREEN CAPACITY
     # --------------------------------------------------------
 
     show = connection.execute("""
         SELECT
             shows.*,
             movies.title AS movie_title,
-            movies.poster
+            movies.poster,
+            screens.capacity AS screen_capacity
         FROM shows
         JOIN movies
             ON shows.movie_id = movies.id
-        WHERE shows.id = ?
+        LEFT JOIN screens
+            ON shows.theatre = screens.theatre
+            AND shows.screen = screens.screen_name
+        WHERE shows.id = %s
     """, (
         show_id,
     )).fetchone()
@@ -541,7 +734,8 @@ def seats(show_id):
     booked_rows = connection.execute("""
         SELECT seat_number
         FROM bookings
-        WHERE show_id = ?
+        WHERE show_id = %s
+        AND booking_status = 'Confirmed'
     """, (
         show_id,
     )).fetchall()
@@ -554,27 +748,55 @@ def seats(show_id):
     ]
 
     # --------------------------------------------------------
+    # GET SCREEN CAPACITY
+    # --------------------------------------------------------
+
+    screen_capacity = show["screen_capacity"]
+
+    # If capacity is unavailable, use the existing 40-seat layout
+    if not screen_capacity:
+        screen_capacity = 40
+
+    # --------------------------------------------------------
     # CREATE AVAILABLE SEATS
     # --------------------------------------------------------
 
     seats_list = []
 
-    for row in [
-        "A",
-        "B",
-        "C",
-        "D",
-        "E"
-    ]:
+    # Maximum 8 seats per row
+    seats_per_row = 8
 
-        for number in range(1, 9):
+    # Calculate number of rows required
+    number_of_rows = (
+        screen_capacity + seats_per_row - 1
+    ) // seats_per_row
+
+    for row_index in range(
+        number_of_rows
+    ):
+
+        row_letter = chr(
+            ord("A") + row_index
+        )
+
+        seats_in_this_row = min(
+            seats_per_row,
+            screen_capacity - (
+                row_index * seats_per_row
+            )
+        )
+
+        for number in range(
+            1,
+            seats_in_this_row + 1
+        ):
 
             seats_list.append(
-                f"{row}{number}"
+                f"{row_letter}{number}"
             )
 
     # --------------------------------------------------------
-    # BOOK SEATS
+    # SELECT SEATS
     # --------------------------------------------------------
 
     if request.method == "POST":
@@ -630,9 +852,6 @@ def seats(show_id):
 
         # ----------------------------------------------------
         # RECHECK BOOKED SEATS
-        #
-        # This prevents a seat from being booked if another
-        # booking happened after the seat page was opened.
         # ----------------------------------------------------
 
         connection = get_db_connection()
@@ -640,10 +859,13 @@ def seats(show_id):
         current_booked_rows = connection.execute("""
             SELECT seat_number
             FROM bookings
-            WHERE show_id = ?
+            WHERE show_id = %s
+            AND booking_status = 'Confirmed'
         """, (
             show_id,
         )).fetchall()
+
+        connection.close()
 
         current_booked_seats = [
             row["seat_number"]
@@ -658,8 +880,6 @@ def seats(show_id):
 
             if seat in current_booked_seats:
 
-                connection.close()
-
                 return render_template(
                     "error.html",
                     message=(
@@ -667,60 +887,6 @@ def seats(show_id):
                         "Please choose another seat."
                     )
                 )
-
-        # ----------------------------------------------------
-        # BOOKING DATE
-        # ----------------------------------------------------
-
-        booking_date = datetime.now().strftime(
-            "%Y-%m-%d %H:%M:%S"
-        )
-
-        # ----------------------------------------------------
-        # INSERT BOOKINGS
-        # ----------------------------------------------------
-
-        try:
-
-            for seat in selected_seats:
-
-                connection.execute("""
-                    INSERT INTO bookings
-                    (
-                        user_id,
-                        show_id,
-                        seat_number,
-                        booking_date
-                    )
-                    VALUES (?, ?, ?, ?)
-                """, (
-                    session["user_id"],
-                    show_id,
-                    seat,
-                    booking_date
-                ))
-
-            connection.commit()
-            connection.close()
-
-        except Exception:
-
-            try:
-
-                connection.rollback()
-                connection.close()
-
-            except Exception:
-
-                pass
-
-            return render_template(
-                "error.html",
-                message=(
-                    "One or more selected seats are no longer "
-                    "available. Please select your seats again."
-                )
-            )
 
         # ----------------------------------------------------
         # CALCULATE TOTAL
@@ -731,11 +897,23 @@ def seats(show_id):
             * len(selected_seats)
         )
 
-        return render_template(
-            "booking_success.html",
-            show=show,
-            selected_seats=selected_seats,
-            total_price=total_price
+        # ----------------------------------------------------
+        # STORE TEMPORARY BOOKING INFORMATION
+        # ----------------------------------------------------
+        # The seats are NOT inserted into the database yet.
+        # They will be inserted only after mock payment succeeds.
+
+        session["pending_booking"] = {
+            "show_id": show_id,
+            "selected_seats": selected_seats
+        }
+
+        # ----------------------------------------------------
+        # GO TO PAYMENT PAGE
+        # ----------------------------------------------------
+
+        return redirect(
+            f"/payment/{show_id}"
         )
 
     # --------------------------------------------------------
@@ -748,7 +926,311 @@ def seats(show_id):
         seats=seats_list,
         booked_seats=booked_seats
     )
+#----------------------------------------------------
+# seat availability
+#----------------------------------------------------
 
+
+@app.route(
+    "/api/seat-availability/<int:show_id>"
+)
+def seat_availability(show_id):
+
+    if "user_id" not in session:
+        return jsonify({
+            "success": False,
+            "message": "Login required."
+        }), 401
+
+    connection = get_db_connection()
+
+    show = connection.execute("""
+        SELECT id
+        FROM shows
+        WHERE id = %s
+    """, (
+        show_id,
+    )).fetchone()
+
+    if show is None:
+
+        connection.close()
+
+        return jsonify({
+            "success": False,
+            "message": "Show not found."
+        }), 404
+
+    booked_rows = connection.execute("""
+        SELECT seat_number
+        FROM bookings
+        WHERE show_id = %s
+        AND booking_status = 'Confirmed'
+    """, (
+        show_id,
+    )).fetchall()
+
+    connection.close()
+
+    booked_seats = [
+        row["seat_number"]
+        for row in booked_rows
+    ]
+
+    return jsonify({
+        "success": True,
+        "booked_seats": booked_seats
+    })
+
+#-------------------------------------------------------
+# payment
+#-------------------------------------------------------
+
+
+@app.route(
+    "/payment/<int:show_id>",
+    methods=["GET", "POST"]
+)
+def payment(show_id):
+
+    if "user_id" not in session:
+        return redirect("/login")
+
+    pending_booking = session.get(
+        "pending_booking"
+    )
+
+    # --------------------------------------------------------
+    # CHECK PENDING BOOKING
+    # --------------------------------------------------------
+
+    if not pending_booking:
+
+        return render_template(
+            "error.html",
+            message="No pending booking was found."
+        )
+
+    if pending_booking["show_id"] != show_id:
+
+        session.pop(
+            "pending_booking",
+            None
+        )
+
+        return render_template(
+            "error.html",
+            message="Invalid booking session."
+        )
+
+    selected_seats = pending_booking[
+        "selected_seats"
+    ]
+
+    # --------------------------------------------------------
+    # GET SHOW INFORMATION
+    # --------------------------------------------------------
+
+    connection = get_db_connection()
+
+    show = connection.execute("""
+        SELECT
+            shows.*,
+            movies.title AS movie_title,
+            movies.poster
+        FROM shows
+        JOIN movies
+            ON shows.movie_id = movies.id
+        WHERE shows.id = %s
+    """, (
+        show_id,
+    )).fetchone()
+
+    connection.close()
+
+    if show is None:
+
+        session.pop(
+            "pending_booking",
+            None
+        )
+
+        return render_template(
+            "error.html",
+            message="Show not found."
+        )
+
+    # --------------------------------------------------------
+    # CALCULATE TOTAL
+    # --------------------------------------------------------
+
+    total_price = (
+        show["price"]
+        * len(selected_seats)
+    )
+
+    # --------------------------------------------------------
+    # PAYMENT
+    # --------------------------------------------------------
+
+    if request.method == "POST":
+
+        payment_method = request.form.get(
+            "payment_method",
+            ""
+        ).strip()
+
+        allowed_payment_methods = [
+            "UPI",
+            "Debit / Credit Card",
+            "Net Banking"
+        ]
+
+        if payment_method not in allowed_payment_methods:
+
+            return render_template(
+                "error.html",
+                message="Please select a valid payment method."
+            )
+
+        # ----------------------------------------------------
+        # RECHECK SEAT AVAILABILITY
+        # ----------------------------------------------------
+
+        connection = get_db_connection()
+
+        current_booked_rows = connection.execute("""
+            SELECT seat_number
+            FROM bookings
+            WHERE show_id = %s
+            AND booking_status = 'Confirmed'
+        """, (
+            show_id,
+        )).fetchall()
+
+        current_booked_seats = [
+            row["seat_number"]
+            for row in current_booked_rows
+        ]
+
+        for seat in selected_seats:
+
+            if seat in current_booked_seats:
+
+                connection.close()
+
+                session.pop(
+                    "pending_booking",
+                    None
+                )
+
+                return render_template(
+                    "error.html",
+                    message=(
+                        f"Seat {seat} was booked by another user "
+                        "before payment was completed. "
+                        "Please select your seats again."
+                    )
+                )
+
+        # ----------------------------------------------------
+        # GENERATE BOOKING INFORMATION
+        # ----------------------------------------------------
+
+        booking_date = datetime.now().strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+
+        booking_reference = (
+            generate_booking_reference()
+        )
+
+        # ----------------------------------------------------
+        # CREATE BOOKING
+        # ----------------------------------------------------
+
+        try:
+
+            for seat in selected_seats:
+
+                connection.execute("""
+                    INSERT INTO bookings
+                    (
+                        user_id,
+                        show_id,
+                        seat_number,
+                        booking_date,
+                        booking_reference
+                    )
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (
+                    session["user_id"],
+                    show_id,
+                    seat,
+                    booking_date,
+                    booking_reference
+                ))
+
+            connection.commit()
+            connection.close()
+
+        except Exception as error:
+
+            try:
+                connection.rollback()
+                connection.close()
+            except Exception:
+                pass
+
+            print(
+                "Payment booking error:",
+                error
+            )
+
+            session.pop(
+                "pending_booking",
+                None
+            )
+
+            return render_template(
+                "error.html",
+                message=(
+                    "Payment was completed, but the booking "
+                    "could not be created. Please try again."
+                )
+            )
+
+        # ----------------------------------------------------
+        # REMOVE TEMPORARY BOOKING DATA
+        # ----------------------------------------------------
+
+        session.pop(
+            "pending_booking",
+            None
+        )
+
+        # ----------------------------------------------------
+        # SHOW BOOKING CONFIRMATION
+        # ----------------------------------------------------
+
+        return render_template(
+            "booking_success.html",
+            show=show,
+            selected_seats=selected_seats,
+            total_price=total_price,
+            booking_reference=booking_reference
+        )
+
+    # --------------------------------------------------------
+    # DISPLAY PAYMENT PAGE
+    # --------------------------------------------------------
+
+    return render_template(
+        "payment.html",
+        show=show,
+        selected_seats=selected_seats,
+        total_price=total_price
+    )
 
 # ============================================================
 # ADMIN LOGIN
@@ -758,6 +1240,7 @@ def seats(show_id):
     "/admin-login",
     methods=["GET", "POST"]
 )
+@limiter.limit("5 per minute")
 def admin_login():
 
     if request.method == "POST":
@@ -846,7 +1329,6 @@ def add_movie():
         )
 
         # ----------------------------------------------------
-        # STEP 14.8
         # VALIDATE MOVIE INFORMATION
         # ----------------------------------------------------
 
@@ -979,7 +1461,7 @@ def add_movie():
                 description,
                 poster
             )
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s)
         """, (
             title,
             genre,
@@ -1015,7 +1497,7 @@ def edit_movie(movie_id):
     movie = connection.execute("""
         SELECT *
         FROM movies
-        WHERE id = ?
+        WHERE id = %s
     """, (
         movie_id,
     )).fetchone()
@@ -1189,13 +1671,13 @@ def edit_movie(movie_id):
         connection.execute("""
             UPDATE movies
             SET
-                title = ?,
-                genre = ?,
-                language = ?,
-                duration = ?,
-                description = ?,
-                poster = ?
-            WHERE id = ?
+                title = %s,
+                genre = %s,
+                language = %s,
+                duration = %s,
+                description = %s,
+                poster = %s
+            WHERE id = %s
         """, (
             title,
             genre,
@@ -1222,11 +1704,11 @@ def edit_movie(movie_id):
 # ============================================================
 
 @app.route(
-    "/admin/delete-movie/<int:movie_id>"
+    "/admin/delete-movie/<int:movie_id>",
+    methods=["POST"]
 )
 @admin_required
 def delete_movie(movie_id):
-
     connection = get_db_connection()
 
     # --------------------------------------------------------
@@ -1236,7 +1718,7 @@ def delete_movie(movie_id):
     show = connection.execute("""
         SELECT id
         FROM shows
-        WHERE movie_id = ?
+        WHERE movie_id = %s
         LIMIT 1
     """, (
         movie_id,
@@ -1261,7 +1743,7 @@ def delete_movie(movie_id):
     movie = connection.execute("""
         SELECT poster
         FROM movies
-        WHERE id = ?
+        WHERE id = %s
     """, (
         movie_id,
     )).fetchone()
@@ -1281,7 +1763,7 @@ def delete_movie(movie_id):
 
     connection.execute("""
         DELETE FROM movies
-        WHERE id = ?
+        WHERE id = %s
     """, (
         movie_id,
     ))
@@ -1330,60 +1812,121 @@ def add_show():
 
     connection = get_db_connection()
 
+    # Get all movies
     movies = connection.execute("""
         SELECT *
         FROM movies
         ORDER BY title
     """).fetchall()
 
-    connection.close()
+    # Get all managed screens
+    screens = connection.execute("""
+        SELECT *
+        FROM screens
+        ORDER BY theatre, screen_name
+    """).fetchall()
 
     if request.method == "POST":
 
-        movie_id = request.form["movie_id"].strip()
-        theatre = request.form["theatre"].strip()
-        show_date = request.form["show_date"].strip()
-        show_time = request.form["show_time"].strip()
-        price = request.form["price"].strip()
+        movie_id = request.form.get(
+            "movie_id",
+            ""
+        ).strip()
 
-        # ----------------------------------------------------
-        # VALIDATE THEATRE
-        # ----------------------------------------------------
+        screen_id = request.form.get(
+            "screen_id",
+            ""
+        ).strip()
 
-        if not theatre:
+        show_date = request.form.get(
+            "show_date",
+            ""
+        ).strip()
+
+        show_time = request.form.get(
+            "show_time",
+            ""
+        ).strip()
+
+        price = request.form.get(
+            "price",
+            ""
+        ).strip()
+
+        # -----------------------------
+        # Validate Movie
+        # -----------------------------
+
+        if not movie_id.isdigit():
+
+            connection.close()
 
             return render_template(
                 "error.html",
-                message="Theatre name is required."
+                message="Please select a valid movie."
             )
 
-        if len(theatre) > 100:
+        movie = connection.execute("""
+            SELECT *
+            FROM movies
+            WHERE id = %s
+        """, (
+            int(movie_id),
+        )).fetchone()
+
+        if movie is None:
+
+            connection.close()
 
             return render_template(
                 "error.html",
-                message="Theatre name must not exceed 100 characters."
+                message="Selected movie does not exist."
             )
 
-        # ----------------------------------------------------
-        # VALIDATE MOVIE ID
-        # ----------------------------------------------------
+        # -----------------------------
+        # Validate Screen
+        # -----------------------------
 
-        try:
+        if not screen_id.isdigit():
 
-            movie_id = int(movie_id)
-
-        except ValueError:
+            connection.close()
 
             return render_template(
                 "error.html",
-                message="Invalid movie selected."
+                message="Please select a valid screen."
             )
 
-        # ----------------------------------------------------
-        # VALIDATE DATE
-        # ----------------------------------------------------
+        selected_screen = connection.execute("""
+            SELECT *
+            FROM screens
+            WHERE id = %s
+        """, (
+            int(screen_id),
+        )).fetchone()
+
+        if selected_screen is None:
+
+            connection.close()
+
+            return render_template(
+                "error.html",
+                message="Selected screen does not exist."
+            )
+
+        # Get theatre and screen automatically
+        theatre = selected_screen["theatre"]
+
+        screen_name = selected_screen[
+            "screen_name"
+        ]
+
+        # -----------------------------
+        # Validate Date
+        # -----------------------------
 
         if not show_date:
+
+            connection.close()
 
             return render_template(
                 "error.html",
@@ -1399,94 +1942,101 @@ def add_show():
 
         except ValueError:
 
+            connection.close()
+
             return render_template(
                 "error.html",
                 message="Invalid show date."
             )
 
-        # ----------------------------------------------------
-        # VALIDATE TIME
-        # ----------------------------------------------------
+        # -----------------------------
+        # Validate Time
+        # -----------------------------
 
         if not show_time:
+
+            connection.close()
 
             return render_template(
                 "error.html",
                 message="Show time is required."
             )
 
-        # ----------------------------------------------------
-        # VALIDATE PRICE
-        # ----------------------------------------------------
+        # -----------------------------
+        # Validate Price
+        # -----------------------------
 
         try:
 
-            price = float(price)
+            price_value = float(price)
+
+            if price_value <= 0:
+                raise ValueError
+
+            if price_value > 10000:
+                raise ValueError
 
         except ValueError:
-
-            return render_template(
-                "error.html",
-                message="Ticket price must be a valid number."
-            )
-
-        if price <= 0:
-
-            return render_template(
-                "error.html",
-                message="Ticket price must be greater than zero."
-            )
-
-        if price > 10000:
-
-            return render_template(
-                "error.html",
-                message="Ticket price must not exceed ₹10,000."
-            )
-
-        # ----------------------------------------------------
-        # CHECK MOVIE EXISTS
-        # ----------------------------------------------------
-
-        connection = get_db_connection()
-
-        movie = connection.execute("""
-            SELECT id
-            FROM movies
-            WHERE id = ?
-        """, (
-            movie_id,
-        )).fetchone()
-
-        if movie is None:
 
             connection.close()
 
             return render_template(
                 "error.html",
-                message="Selected movie does not exist."
+                message="Ticket price must be between ₹1 and ₹10,000."
             )
 
-        # ----------------------------------------------------
-        # INSERT SHOW
-        # ----------------------------------------------------
+        # -----------------------------
+        # CHECK SHOWTIME CONFLICT
+        # -----------------------------
+
+        existing_show = connection.execute("""
+            SELECT id
+            FROM shows
+            WHERE theatre = %s
+            AND screen = %s
+            AND show_date = %s
+            AND show_time = %s
+        """, (
+            theatre,
+            screen_name,
+            show_date,
+            show_time
+        )).fetchone()
+
+        if existing_show is not None:
+
+            connection.close()
+
+            return render_template(
+                "error.html",
+                message=(
+                    "This screen already has a show scheduled "
+                    "at the selected date and time."
+                )
+            )
+
+        # -----------------------------
+        # Insert Show
+        # -----------------------------
 
         connection.execute("""
             INSERT INTO shows
             (
                 movie_id,
                 theatre,
+                screen,
                 show_date,
                 show_time,
                 price
             )
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s)
         """, (
-            movie_id,
+            int(movie_id),
             theatre,
+            screen_name,
             show_date,
             show_time,
-            price
+            price_value
         ))
 
         connection.commit()
@@ -1494,9 +2044,12 @@ def add_show():
 
         return redirect("/admin")
 
+    connection.close()
+
     return render_template(
         "add_show.html",
-        movies=movies
+        movies=movies,
+        screens=screens
     )
 
 
@@ -1505,7 +2058,8 @@ def add_show():
 # ============================================================
 
 @app.route(
-    "/admin/delete-show/<int:show_id>"
+    "/admin/delete-show/<int:show_id>",
+    methods=["POST"]
 )
 @admin_required
 def delete_show(show_id):
@@ -1519,7 +2073,7 @@ def delete_show(show_id):
     booking = connection.execute("""
         SELECT id
         FROM bookings
-        WHERE show_id = ?
+        WHERE show_id = %s
         LIMIT 1
     """, (
         show_id,
@@ -1531,11 +2085,12 @@ def delete_show(show_id):
 
         return render_template(
             "error.html",
-            message=(
+             message=(
                 "This show cannot be deleted "
                 "because bookings are associated with it."
-            )
-        )
+            ),
+             back_url="/admin"
+    )
 
     # --------------------------------------------------------
     # CHECK SHOW
@@ -1544,7 +2099,7 @@ def delete_show(show_id):
     show = connection.execute("""
         SELECT id
         FROM shows
-        WHERE id = ?
+        WHERE id = %s
     """, (
         show_id,
     )).fetchone()
@@ -1553,10 +2108,11 @@ def delete_show(show_id):
 
         connection.close()
 
-        return render_template(
-            "error.html",
-            message="Show not found."
-        )
+    return render_template(
+        "error.html",
+        message="Show not found.",
+        back_url="/admin"
+    )
 
     # --------------------------------------------------------
     # DELETE SHOW
@@ -1564,7 +2120,7 @@ def delete_show(show_id):
 
     connection.execute("""
         DELETE FROM shows
-        WHERE id = ?
+        WHERE id = %s
     """, (
         show_id,
     ))
@@ -1630,6 +2186,9 @@ def admin():
             bookings.id,
             bookings.seat_number,
             bookings.booking_date,
+            bookings.booking_reference,
+            bookings.booking_status,
+            bookings.cancelled_at,
             users.name AS user_name,
             users.email,
             movies.title AS movie_title,
@@ -1647,15 +2206,293 @@ def admin():
         ORDER BY bookings.id DESC
     """).fetchall()
 
+    # --------------------------------------------------------
+    # ADMIN ANALYTICS
+    # --------------------------------------------------------
+
+    total_users = connection.execute("""
+        SELECT COUNT(*) AS value
+        FROM users
+    """).fetchone()["value"]
+
+    total_movies = connection.execute("""
+        SELECT COUNT(*) AS value
+        FROM movies
+    """).fetchone()["value"]
+
+    total_shows = connection.execute("""
+        SELECT COUNT(*) AS value
+        FROM shows
+    """).fetchone()["value"]
+
+    total_bookings = connection.execute("""
+        SELECT COUNT(*) AS value
+        FROM bookings
+    """).fetchone()["value"]
+
+    confirmed_bookings = connection.execute("""
+        SELECT COUNT(*) AS value
+        FROM bookings
+        WHERE booking_status = 'Confirmed'
+    """).fetchone()["value"]
+
+    cancelled_bookings = connection.execute("""
+        SELECT COUNT(*) AS value
+        FROM bookings
+        WHERE booking_status = 'Cancelled'
+    """).fetchone()["value"]
+
+    total_revenue = connection.execute("""
+        SELECT COALESCE(SUM(shows.price), 0) AS value
+        FROM bookings
+        JOIN shows
+            ON bookings.show_id = shows.id
+        WHERE bookings.booking_status = 'Confirmed'
+    """).fetchone()["value"]
+
+    today_bookings = connection.execute("""
+        SELECT COUNT(*) AS value
+        FROM bookings
+        WHERE CAST(booking_date AS DATE) = CURRENT_DATE
+    """).fetchone()["value"]
+
     connection.close()
+
+    # --------------------------------------------------------
+    # SEND DATA TO ADMIN PAGE
+    # --------------------------------------------------------
 
     return render_template(
         "admin.html",
         users=users,
         movies=movies,
         shows=shows,
-        bookings=bookings
+        bookings=bookings,
+
+        # Analytics
+        total_users=total_users,
+        total_movies=total_movies,
+        total_shows=total_shows,
+        total_bookings=total_bookings,
+        confirmed_bookings=confirmed_bookings,
+        cancelled_bookings=cancelled_bookings,
+        total_revenue=total_revenue,
+        today_bookings=today_bookings
     )
+
+
+# ============================================================
+# ADMIN - SCREEN MANAGEMENT
+# ============================================================
+
+@app.route(
+    "/admin/screens",
+    methods=["GET", "POST"]
+)
+@admin_required
+def manage_screens():
+
+    connection = get_db_connection()
+
+    # =========================
+    # ADD NEW SCREEN
+    # =========================
+
+    if request.method == "POST":
+
+        theatre = request.form.get(
+            "theatre",
+            ""
+        ).strip()
+
+        screen_name = request.form.get(
+            "screen_name",
+            ""
+        ).strip()
+
+        capacity = request.form.get(
+            "capacity",
+            ""
+        ).strip()
+
+        # Theatre validation
+        if not theatre:
+
+            connection.close()
+
+            return render_template(
+                "error.html",
+                message="Theatre name is required."
+            )
+
+        if len(theatre) > 100:
+
+            connection.close()
+
+            return render_template(
+                "error.html",
+                message="Theatre name must not exceed 100 characters."
+            )
+
+        # Screen name validation
+        if not screen_name:
+
+            connection.close()
+
+            return render_template(
+                "error.html",
+                message="Screen / Auditorium name is required."
+            )
+
+        if len(screen_name) > 50:
+
+            connection.close()
+
+            return render_template(
+                "error.html",
+                message="Screen name must not exceed 50 characters."
+            )
+
+        # Capacity validation
+        try:
+
+            capacity_value = int(capacity)
+
+        except (
+            ValueError,
+            TypeError
+        ):
+
+            connection.close()
+
+            return render_template(
+                "error.html",
+                message="Seat capacity must be a valid number."
+            )
+
+        if capacity_value < 1:
+
+            connection.close()
+
+            return render_template(
+                "error.html",
+                message="Seat capacity must be at least 1."
+            )
+
+        if capacity_value > 500:
+
+            connection.close()
+
+            return render_template(
+                "error.html",
+                message="Seat capacity cannot exceed 500."
+            )
+
+        # =========================
+        # INSERT SCREEN
+        # =========================
+
+        try:
+
+            connection.execute("""
+                INSERT INTO screens
+                (
+                    theatre,
+                    screen_name,
+                    capacity
+                )
+                VALUES (%s, %s, %s)
+            """, (
+                theatre,
+                screen_name,
+                capacity_value
+            ))
+
+            connection.commit()
+
+        except Exception as error:
+
+            connection.rollback()
+            connection.close()
+
+            return render_template(
+                "error.html",
+                message=f"Unable to add screen: {error}"
+            )
+
+    # =========================
+    # GET ALL SCREENS
+    # =========================
+
+    screens = connection.execute("""
+        SELECT *
+        FROM screens
+        ORDER BY theatre, id
+    """).fetchall()
+
+    connection.close()
+
+    return render_template(
+        "screens.html",
+        screens=screens
+    )
+
+
+# ============================================================
+# ADMIN - DELETE SCREEN
+# ============================================================
+
+@app.route(
+    "/admin/delete-screen/<int:screen_id>",
+    methods=["POST"]
+)
+@admin_required
+def delete_screen(screen_id):
+    
+    connection = get_db_connection()
+
+    # Check whether the screen exists
+    screen = connection.execute("""
+        SELECT *
+        FROM screens
+        WHERE id = %s
+    """, (
+        screen_id,
+    )).fetchone()
+
+    if screen is None:
+
+        connection.close()
+
+        return render_template(
+            "error.html",
+            message="Screen not found."
+        )
+
+    try:
+
+        connection.execute("""
+            DELETE FROM screens
+            WHERE id = %s
+        """, (
+            screen_id,
+        ))
+
+        connection.commit()
+
+    except Exception as error:
+
+        connection.rollback()
+        connection.close()
+
+        return render_template(
+            "error.html",
+            message=f"Unable to delete screen: {error}"
+        )
+
+    connection.close()
+
+    return redirect("/admin/screens")
 
 
 # ============================================================
@@ -1663,7 +2500,8 @@ def admin():
 # ============================================================
 
 @app.route(
-    "/admin/delete-booking/<int:booking_id>"
+    "/admin/delete-booking/<int:booking_id>",
+    methods=["POST"]
 )
 @admin_required
 def delete_booking(booking_id):
@@ -1673,7 +2511,7 @@ def delete_booking(booking_id):
     booking = connection.execute("""
         SELECT id
         FROM bookings
-        WHERE id = ?
+        WHERE id = %s
     """, (
         booking_id,
     )).fetchone()
@@ -1689,7 +2527,7 @@ def delete_booking(booking_id):
 
     connection.execute("""
         DELETE FROM bookings
-        WHERE id = ?
+        WHERE id = %s
     """, (
         booking_id,
     ))
@@ -1708,7 +2546,6 @@ def delete_booking(booking_id):
 def my_bookings():
 
     if "user_id" not in session:
-
         return redirect("/login")
 
     connection = get_db_connection()
@@ -1716,28 +2553,61 @@ def my_bookings():
     bookings = connection.execute("""
         SELECT
             MIN(bookings.id) AS booking_id,
+
+            MAX(bookings.booking_reference)
+                AS booking_reference,
+
             movies.title AS movie_title,
+
             movies.poster,
+
             shows.theatre,
+
+            shows.screen,
+
             shows.show_date,
+
             shows.show_time,
-            GROUP_CONCAT(
+
+            STRING_AGG(
                 bookings.seat_number,
                 ', '
             ) AS seat_numbers,
+
             SUM(shows.price) AS total_price,
-            MAX(bookings.booking_date) AS booking_date
+
+            MAX(bookings.booking_date)
+                AS booking_date,
+
+            MAX(bookings.booking_status)
+                AS booking_status,
+
+            MAX(bookings.cancelled_at)
+                AS cancelled_at
+
         FROM bookings
+
         JOIN shows
             ON bookings.show_id = shows.id
+
         JOIN movies
             ON shows.movie_id = movies.id
-        WHERE bookings.user_id = ?
+
+        WHERE bookings.user_id = %s
+
         GROUP BY
             bookings.show_id,
-            bookings.booking_date
+            bookings.booking_reference,
+            movies.title,
+            movies.poster,
+            shows.theatre,
+            shows.screen,
+            shows.show_date,
+            shows.show_time
+
         ORDER BY
             booking_id DESC
+
     """, (
         session["user_id"],
     )).fetchall()
@@ -1751,6 +2621,43 @@ def my_bookings():
 
 
 # ============================================================
+# USER PROFILE
+# ============================================================
+
+@app.route("/profile")
+def profile():
+
+    if "user_id" not in session:
+        return redirect("/login")
+
+    connection = get_db_connection()
+
+    user = connection.execute("""
+        SELECT
+            id,
+            name,
+            email
+        FROM users
+        WHERE id = %s
+    """, (
+        session["user_id"],
+    )).fetchone()
+
+    connection.close()
+
+    if user is None:
+
+        session.clear()
+
+        return redirect("/login")
+
+    return render_template(
+        "profile.html",
+        user=user
+    )
+
+
+# ============================================================
 # VIEW TICKET
 # ============================================================
 
@@ -1760,23 +2667,20 @@ def my_bookings():
 def view_ticket(booking_id):
 
     if "user_id" not in session:
-
         return redirect("/login")
 
     connection = get_db_connection()
-
-    # --------------------------------------------------------
-    # GET SELECTED BOOKING
-    # --------------------------------------------------------
 
     booking = connection.execute("""
         SELECT
             bookings.id AS booking_id,
             bookings.show_id,
             bookings.booking_date,
+            bookings.booking_reference,
             movies.title AS movie_title,
             movies.poster,
             shows.theatre,
+            shows.screen,
             shows.show_date,
             shows.show_time,
             shows.price
@@ -1785,8 +2689,8 @@ def view_ticket(booking_id):
             ON bookings.show_id = shows.id
         JOIN movies
             ON shows.movie_id = movies.id
-        WHERE bookings.id = ?
-        AND bookings.user_id = ?
+        WHERE bookings.id = %s
+        AND bookings.user_id = %s
     """, (
         booking_id,
         session["user_id"]
@@ -1801,21 +2705,18 @@ def view_ticket(booking_id):
             message="Booking not found."
         )
 
-    # --------------------------------------------------------
-    # GET ALL SEATS FROM THIS BOOKING
-    # --------------------------------------------------------
-
     seats = connection.execute("""
-        SELECT seat_number
+        SELECT
+            seat_number
         FROM bookings
-        WHERE user_id = ?
-        AND show_id = ?
-        AND booking_date = ?
+        WHERE user_id = %s
+        AND show_id = %s
+        AND booking_reference = %s
         ORDER BY seat_number
     """, (
         session["user_id"],
         booking["show_id"],
-        booking["booking_date"]
+        booking["booking_reference"]
     )).fetchall()
 
     connection.close()
@@ -1825,21 +2726,155 @@ def view_ticket(booking_id):
         for seat in seats
     ]
 
-    # --------------------------------------------------------
-    # TOTAL PRICE
-    # --------------------------------------------------------
-
     total_price = (
         booking["price"]
         * len(seat_numbers)
     )
 
+    # ========================================================
+    # GENERATE QR CODE
+    # ========================================================
+
+    qr_data = f"""
+MovieTicket
+
+Booking Reference: {booking["booking_reference"]}
+
+Movie: {booking["movie_title"]}
+
+Theatre: {booking["theatre"]}
+
+Screen: {booking["screen"]}
+
+Date: {booking["show_date"]}
+
+Time: {booking["show_time"]}
+
+Seats: {", ".join(seat_numbers)}
+
+Total Amount: ₹{total_price}
+"""
+
+    qr = qrcode.make(qr_data)
+
+    # ========================================================
+    # QR CODE FILE NAME
+    # ========================================================
+
+    qr_filename = (
+        f"{booking['booking_reference']}.png"
+    )
+
+    # ========================================================
+    # QR CODE FILE PATH
+    # ========================================================
+
+    qr_path = os.path.join(
+        app.root_path,
+        "static",
+        "qr_codes",
+        qr_filename
+    )
+
+    # ========================================================
+    # SAVE QR CODE
+    # ========================================================
+
+    qr.save(qr_path)
+
+    # ========================================================
+    # DISPLAY TICKET
+    # ========================================================
+
     return render_template(
         "view_ticket.html",
         booking=booking,
         seat_numbers=seat_numbers,
-        total_price=total_price
+        total_price=total_price,
+        qr_filename=qr_filename
     )
+
+
+# ============================================================
+# CANCEL BOOKING
+# ============================================================
+
+@app.route("/cancel-booking/<int:booking_id>", methods=["POST"])
+def cancel_booking(booking_id):
+
+    if "user_id" not in session:
+        return redirect("/login")
+
+    connection = get_db_connection()
+
+    booking = connection.execute("""
+        SELECT
+            id,
+            show_id,
+            booking_reference,
+            booking_status
+        FROM bookings
+        WHERE id = %s
+        AND user_id = %s
+    """, (
+        booking_id,
+        session["user_id"]
+    )).fetchone()
+
+    if booking is None:
+
+        connection.close()
+
+        return render_template(
+            "error.html",
+            message="Booking not found."
+        )
+
+    if booking["booking_status"] == "Cancelled":
+
+        connection.close()
+
+        return redirect("/my-bookings")
+
+    try:
+
+        cancellation_time = datetime.now().strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+
+        # Cancel every seat belonging to this booking
+        connection.execute("""
+            UPDATE bookings
+            SET
+                booking_status = 'Cancelled',
+                cancelled_at = %s
+            WHERE user_id = %s
+            AND show_id = %s
+            AND booking_reference = %s
+        """, (
+            cancellation_time,
+            session["user_id"],
+            booking["show_id"],
+            booking["booking_reference"]
+        ))
+
+        connection.commit()
+
+    except Exception as error:
+
+        connection.rollback()
+        connection.close()
+
+        print("Cancellation error:", error)
+
+        return render_template(
+            "error.html",
+            message="Unable to cancel the booking. Please try again."
+        )
+
+    connection.close()
+
+    return redirect("/my-bookings")
 
 
 # ============================================================
@@ -1874,7 +2909,8 @@ def logout():
 # ============================================================
 
 if __name__ == "__main__":
-
     app.run(
+        host="0.0.0.0",
+        port=5000,
         debug=True
     )

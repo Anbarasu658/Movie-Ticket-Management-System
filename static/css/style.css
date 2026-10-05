@@ -2128,3 +2128,104 @@ button {
     }
 
 }
+/* ============================================================
+   BOOKING REFERENCE
+============================================================ */
+
+.booking-reference-box {
+    max-width: 500px;
+    margin: 25px auto;
+    padding: 25px;
+    text-align: center;
+    background: #fff8d6;
+    border: 2px solid #ffcc00;
+    border-radius: 12px;
+}
+
+.booking-reference-label {
+    margin: 0 0 8px;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: #555;
+}
+
+.booking-reference-box h2 {
+    margin: 0;
+    font-size: 28px;
+    letter-spacing: 2px;
+    color: #111;
+}
+
+.booking-reference-box p:last-child {
+    margin-top: 10px;
+    color: #555;
+    font-size: 14px;
+}
+/* ============================================================
+   BOOKING TOTAL AMOUNT FIX
+============================================================ */
+
+.booking-total-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 24px;
+    margin-top: 20px;
+    background: #eeeeee;
+    border-radius: 12px;
+}
+
+.booking-total-label {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #555555;
+}
+
+.booking-total-price {
+    display: block;
+    color: #111111;
+    font-size: 28px;
+    font-weight: 800;
+    white-space: nowrap;
+    visibility: visible;
+    opacity: 1;
+}
+/* ============================================================
+   MY BOOKINGS - BOOKING REFERENCE
+============================================================ */
+
+.booking-reference-display {
+    margin: 15px 0;
+    padding: 14px 16px;
+    background: #fff8d6;
+    border: 1px solid #ffcc00;
+    border-radius: 8px;
+}
+
+.booking-reference-display span {
+    display: block;
+    margin-bottom: 5px;
+
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+
+    color: #666;
+}
+
+.booking-reference-display strong {
+    display: block;
+
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 1px;
+
+    color: #111;
+
+    word-break: break-word;
+}

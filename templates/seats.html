@@ -5,12 +5,311 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <title>Select Seats - MovieTicket</title>
+    <title>Select Seats - Movie Ticket Management</title>
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <style>
+
+        /* =========================================
+           SEAT SELECTION PAGE
+        ========================================= */
+
+        .seat-page {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .seat-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .seat-header h1 {
+            margin-bottom: 10px;
+        }
+
+        .seat-header p {
+            margin: 5px 0;
+        }
+
+
+        /* =========================================
+           SHOW INFORMATION
+        ========================================= */
+
+        .show-info-box {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 35px;
+        }
+
+        .show-info-item {
+            background: #161616;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .show-info-item strong {
+            display: block;
+            color: #ffcc00;
+            margin-bottom: 6px;
+        }
+
+
+        /* =========================================
+           SCREEN
+        ========================================= */
+
+        .screen-container {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .screen {
+            width: 70%;
+            max-width: 650px;
+            height: 45px;
+            margin: 0 auto 10px;
+            background: #eeeeee;
+            color: #111;
+            border-radius: 50% 50% 8px 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow:
+                0 8px 20px rgba(255, 255, 255, 0.15);
+        }
+
+        .screen-label {
+            color: #aaa;
+            font-size: 14px;
+        }
+
+
+        /* =========================================
+           LIVE AVAILABILITY STATUS
+        ========================================= */
+
+        .availability-status {
+            text-align: center;
+            margin: -15px auto 25px;
+            color: #999;
+            font-size: 13px;
+        }
+
+        .availability-status span {
+            color: #ffcc00;
+            font-weight: bold;
+        }
+
+
+        /* =========================================
+           SEAT AREA
+        ========================================= */
+
+        .seat-area {
+            background: #101010;
+            border: 1px solid #292929;
+            border-radius: 15px;
+            padding: 30px 20px;
+            overflow-x: auto;
+        }
+
+        .seat-layout {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            min-width: 600px;
+        }
+
+        .seat-row {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .row-label {
+            width: 28px;
+            color: #ffcc00;
+            font-weight: bold;
+            text-align: center;
+        }
+
+
+        /* =========================================
+           SEATS
+        ========================================= */
+
+        .seat-checkbox {
+            display: none;
+        }
+
+        .seat {
+            width: 42px;
+            height: 36px;
+            border-radius: 8px 8px 5px 5px;
+            background: #222;
+            border: 1px solid #555;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            user-select: none;
+            transition:
+                background 0.2s ease,
+                border-color 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        .seat:hover {
+            transform: translateY(-2px);
+            border-color: #ffcc00;
+        }
+
+
+        /* =========================================
+           SELECTED
+        ========================================= */
+
+        .seat-checkbox:checked + .seat {
+            background: #ffcc00;
+            color: #111;
+            border-color: #ffcc00;
+            font-weight: bold;
+        }
+
+
+        /* =========================================
+           BOOKED
+        ========================================= */
+
+        .seat.booked {
+            background: #555;
+            border-color: #555;
+            color: #aaa;
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
+
+
+        /* =========================================
+           SEAT LEGEND
+        ========================================= */
+
+        .seat-legend {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #bbb;
+            font-size: 13px;
+        }
+
+        .legend-seat {
+            width: 22px;
+            height: 18px;
+            border-radius: 4px;
+            border: 1px solid #555;
+            background: #222;
+        }
+
+        .legend-seat.selected {
+            background: #ffcc00;
+            border-color: #ffcc00;
+        }
+
+        .legend-seat.booked {
+            background: #555;
+            border-color: #555;
+        }
+
+
+        /* =========================================
+           BOOKING AREA
+        ========================================= */
+
+        .booking-controls {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .selected-count {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .selected-count span {
+            color: #ffcc00;
+            font-weight: bold;
+        }
+
+        .confirm-seat-button {
+            border: none;
+            cursor: pointer;
+            padding: 13px 28px;
+            border-radius: 8px;
+            background: #ffcc00;
+            color: #111;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .confirm-seat-button:hover {
+            transform: translateY(-2px);
+        }
+
+
+        /* =========================================
+           RESPONSIVE
+        ========================================= */
+
+        @media (max-width: 700px) {
+
+            .show-info-box {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .seat-area {
+                padding: 20px 10px;
+            }
+
+            .seat-layout {
+                min-width: 500px;
+            }
+
+            .seat {
+                width: 38px;
+                height: 34px;
+                font-size: 10px;
+            }
+
+        }
+
+    </style>
 
 </head>
 
@@ -18,311 +317,649 @@
 <body>
 
 
-    <!-- =========================
-         NAVIGATION
-    ========================== -->
+    <!-- =========================================
+         NAVBAR
+    ========================================== -->
 
     <nav class="navbar">
 
-        <div class="logo">
-            🎬 MovieTicket
+        <div class="nav-logo">
+            Movie Ticket Management
         </div>
 
         <div class="nav-links">
-
-            <a href="/">
-                Home
-            </a>
 
             <a href="/movies">
                 Movies
             </a>
 
-            <a href="/shows">
-                Shows
+            <a href="/my-bookings">
+                My Bookings
             </a>
 
-            {% if session.get("user_id") %}
-
-                <span class="welcome-user">
-                    Hi, {{ session.get("user_name") }}
-                </span>
-
-                <a href="/logout">
-                    Logout
-                </a>
-
-            {% else %}
-
-                <a href="/login">
-                    Login
-                </a>
-
-            {% endif %}
+            <a href="/logout">
+                Logout
+            </a>
 
         </div>
 
     </nav>
 
 
+    <!-- =========================================
+         MAIN
+    ========================================== -->
 
-    <!-- =========================
-         PAGE HEADER
-    ========================== -->
-
-    <section class="seat-page-header">
-
-        <p class="hero-small-title">
-            MOVIETICKET
-        </p>
-
-        <h1>
-            Select Your Seats
-        </h1>
-
-        <p>
-            Choose your preferred seats and continue with your booking.
-        </p>
-
-    </section>
+    <main
+        class="seat-page"
+        id="seatPage"
+        data-show-id="{{ show['id'] }}"
+    >
 
 
+        <!-- HEADER -->
 
-    <!-- =========================
-         SEAT BOOKING SECTION
-    ========================== -->
+        <div class="seat-header">
 
-    <section class="seat-section">
-
-
-        <!-- MOVIE DETAILS -->
-
-        <div class="seat-movie-card">
-
-            <div>
-
-                <p class="seat-label">
-                    MOVIE
-                </p>
-
-                <h2>
-                    {{ show["title"] }}
-                </h2>
-
-            </div>
-
-
-            <div>
-
-                <p class="seat-label">
-                    THEATRE
-                </p>
-
-                <strong>
-                    {{ show["theatre"] }}
-                </strong>
-
-            </div>
-
-
-            <div>
-
-                <p class="seat-label">
-                    DATE
-                </p>
-
-                <strong>
-                    {{ show["show_date"] }}
-                </strong>
-
-            </div>
-
-
-            <div>
-
-                <p class="seat-label">
-                    TIME
-                </p>
-
-                <strong>
-                    {{ show["show_time"] }}
-                </strong>
-
-            </div>
-
-
-            <div>
-
-                <p class="seat-label">
-                    PRICE
-                </p>
-
-                <strong class="seat-price">
-                    ₹{{ show["price"] }}
-                </strong>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- SCREEN -->
-
-        <div class="cinema-screen-container">
-
-            <div class="cinema-screen">
-                SCREEN
-            </div>
+            <h1>
+                Select Your Seats
+            </h1>
 
             <p>
-                All eyes this way
+                {{ show['movie_title'] }}
             </p>
 
         </div>
 
 
+        <!-- =====================================
+             SHOW INFORMATION
+        ====================================== -->
 
-        <!-- LEGEND -->
+        <div class="show-info-box">
 
-        <div class="seat-legend">
+            <div class="show-info-item">
 
-            <div class="legend-item">
+                <strong>
+                    Theatre
+                </strong>
 
-                <span class="legend-seat available-seat"></span>
-
-                <span>
-                    Available
-                </span>
-
-            </div>
-
-
-            <div class="legend-item">
-
-                <span class="legend-seat selected-seat"></span>
-
-                <span>
-                    Selected
-                </span>
+                {{ show['theatre'] }}
 
             </div>
 
 
-            <div class="legend-item">
+            <div class="show-info-item">
 
-                <span class="legend-seat booked-seat"></span>
+                <strong>
+                    Screen
+                </strong>
 
-                <span>
-                    Booked
-                </span>
+                {{ show['screen'] }}
+
+            </div>
+
+
+            <div class="show-info-item">
+
+                <strong>
+                    Date
+                </strong>
+
+                {{ show['show_date'] }}
+
+            </div>
+
+
+            <div class="show-info-item">
+
+                <strong>
+                    Time
+                </strong>
+
+                {{ show['show_time'] }}
 
             </div>
 
         </div>
 
 
+        <!-- =====================================
+             SCREEN
+        ====================================== -->
 
-        <!-- SEAT FORM -->
+        <div class="screen-container">
 
-        <form method="POST">
+            <div class="screen">
+                SCREEN
+            </div>
+
+            <div class="screen-label">
+                All eyes this way
+            </div>
+
+        </div>
 
 
-            <div class="cinema-seats">
+        <!-- =====================================
+             LIVE AVAILABILITY
+        ====================================== -->
+
+        <div class="availability-status">
+
+            Live seat availability:
+
+            <span id="availabilityStatus">
+                Checking...
+            </span>
+
+        </div>
 
 
-                {% for seat in seats %}
+        <!-- =====================================
+             SEAT FORM
+        ====================================== -->
+
+        <form
+            method="POST"
+            action="{{ url_for('seats', show_id=show['id']) }}"
+            id="seatForm"
+        >
+
+            <!-- CSRF PROTECTION -->
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
 
 
-                    {% if seat in booked_seats %}
+            <div class="seat-area">
+
+                <div class="seat-layout">
+
+                    {% set current_row = namespace(letter="") %}
+
+                    {% for seat in seats %}
+
+                        {% set row_letter = seat[0] %}
 
 
-                        <label class="cinema-seat booked">
+                        {% if row_letter != current_row.letter %}
 
-                            <input
-                                type="checkbox"
-                                disabled
+                            {% if not loop.first %}
+
+                                </div>
+
+                            {% endif %}
+
+
+                            {% set current_row.letter = row_letter %}
+
+
+                            <div class="seat-row">
+
+                                <div class="row-label">
+                                    {{ row_letter }}
+                                </div>
+
+                        {% endif %}
+
+
+                        {% if seat in booked_seats %}
+
+                            <div
+                                class="seat booked"
+                                title="Already booked"
+                                data-seat="{{ seat }}"
                             >
-
-                            <span>
                                 {{ seat }}
-                            </span>
+                            </div>
 
-                        </label>
-
-
-                    {% else %}
-
-
-                        <label class="cinema-seat">
+                        {% else %}
 
                             <input
                                 type="checkbox"
+                                class="seat-checkbox"
+                                id="seat-{{ seat }}"
                                 name="seats"
                                 value="{{ seat }}"
+                                data-seat="{{ seat }}"
                             >
 
-                            <span>
+                            <label
+                                for="seat-{{ seat }}"
+                                class="seat"
+                                data-seat="{{ seat }}"
+                            >
                                 {{ seat }}
-                            </span>
+                            </label>
 
-                        </label>
-
-
-                    {% endif %}
+                        {% endif %}
 
 
-                {% endfor %}
+                        {% if loop.last %}
 
+                            </div>
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                </div>
 
             </div>
 
 
+            <!-- =================================
+                 LEGEND
+            ================================== -->
 
-            <!-- BOOKING ACTION -->
+            <div class="seat-legend">
 
-            <div class="seat-action">
+                <div class="legend-item">
 
-                <p>
-                    Select one or more available seats.
-                </p>
+                    <div class="legend-seat"></div>
+
+                    Available
+
+                </div>
+
+
+                <div class="legend-item">
+
+                    <div class="legend-seat selected"></div>
+
+                    Selected
+
+                </div>
+
+
+                <div class="legend-item">
+
+                    <div class="legend-seat booked"></div>
+
+                    Booked
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================
+                 BOOKING CONTROLS
+            ================================== -->
+
+            <div class="booking-controls">
+
+                <div class="selected-count">
+
+                    Selected Seats:
+
+                    <span id="selectedCount">
+                        0
+                    </span>
+
+                </div>
+
 
                 <button
                     type="submit"
                     class="confirm-seat-button"
+                    id="confirmSeatButton"
                 >
-                    Continue to Booking →
+                    Confirm Seats
                 </button>
 
             </div>
 
-
         </form>
 
-
-    </section>
-
+    </main>
 
 
-    <!-- =========================
+    <!-- =========================================
          FOOTER
-    ========================== -->
+    ========================================== -->
 
-    <footer>
-
-        <h3>
-            🎬 MovieTicket
-        </h3>
+    <footer class="site-footer">
 
         <p>
-            Your simple movie ticket booking system.
-        </p>
-
-        <p class="footer-copy">
-            © 2026 MovieTicket. All rights reserved.
+            © 2026 Movie Ticket Management System
         </p>
 
     </footer>
+
+
+    <!-- =========================================
+         JAVASCRIPT
+    ========================================== -->
+
+    <script>
+
+        /*
+         * Get the show ID from the HTML data attribute.
+         *
+         * This avoids putting Jinja directly inside
+         * the JavaScript code.
+         */
+
+        const seatPage =
+            document.getElementById("seatPage");
+
+        const showId =
+            seatPage.dataset.showId;
+
+
+        /*
+         * Get all available seat checkboxes.
+         */
+
+        const checkboxes =
+            document.querySelectorAll(
+                ".seat-checkbox"
+            );
+
+
+        /*
+         * Selected seat counter.
+         */
+
+        const selectedCount =
+            document.getElementById(
+                "selectedCount"
+            );
+
+
+        /*
+         * Live availability status.
+         */
+
+        const availabilityStatus =
+            document.getElementById(
+                "availabilityStatus"
+            );
+
+
+        /*
+         * Confirm button.
+         */
+
+        const confirmSeatButton =
+            document.getElementById(
+                "confirmSeatButton"
+            );
+
+
+        /* =========================================
+           UPDATE SELECTED SEAT COUNT
+        ========================================= */
+
+        function updateSelectedCount() {
+
+            const selected =
+                document.querySelectorAll(
+                    ".seat-checkbox:checked"
+                );
+
+            selectedCount.textContent =
+                selected.length;
+
+        }
+
+
+        /* =========================================
+           NORMAL SEAT SELECTION
+        ========================================= */
+
+        checkboxes.forEach(
+            function (checkbox) {
+
+                checkbox.addEventListener(
+                    "change",
+                    updateSelectedCount
+                );
+
+            }
+        );
+
+
+        /* =========================================
+           MARK SEAT AS BOOKED
+        ========================================= */
+
+        function markSeatAsBooked(
+            seatNumber
+        ) {
+
+            const checkbox =
+                document.querySelector(
+                    '.seat-checkbox[data-seat="' +
+                    seatNumber +
+                    '"]'
+                );
+
+
+            /*
+             * If the seat is still available
+             * on this page, convert it to booked.
+             */
+
+            if (checkbox) {
+
+                /*
+                 * Remove it from the user's selection.
+                 */
+
+                checkbox.checked = false;
+
+
+                /*
+                 * Disable the checkbox.
+                 */
+
+                checkbox.disabled = true;
+
+
+                /*
+                 * Find the visible seat label.
+                 */
+
+                const label =
+                    document.querySelector(
+                        'label.seat[data-seat="' +
+                        seatNumber +
+                        '"]'
+                    );
+
+
+                /*
+                 * Change the appearance to booked.
+                 */
+
+                if (label) {
+
+                    label.classList.add(
+                        "booked"
+                    );
+
+                    label.textContent =
+                        seatNumber;
+
+                    label.title =
+                        "Already booked";
+
+                }
+
+            }
+
+
+            /*
+             * Update the selected seat count.
+             */
+
+            updateSelectedCount();
+
+        }
+
+
+        /* =========================================
+           CHECK REAL-TIME AVAILABILITY
+        ========================================= */
+
+        async function checkSeatAvailability() {
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/seat-availability/" +
+                        showId,
+                        {
+                            method: "GET",
+                            cache: "no-store"
+                        }
+                    );
+
+
+                /*
+                 * Check HTTP response.
+                 */
+
+                if (!response.ok) {
+
+                    availabilityStatus.textContent =
+                        "Unavailable";
+
+                    return;
+
+                }
+
+
+                /*
+                 * Convert response to JSON.
+                 */
+
+                const data =
+                    await response.json();
+
+
+                /*
+                 * Check API success.
+                 */
+
+                if (!data.success) {
+
+                    availabilityStatus.textContent =
+                        "Unavailable";
+
+                    return;
+
+                }
+
+
+                /*
+                 * Get booked seats.
+                 */
+
+                const bookedSeats =
+                    data.booked_seats || [];
+
+
+                /*
+                 * Mark newly booked seats.
+                 */
+
+                bookedSeats.forEach(
+                    function (seatNumber) {
+
+                        markSeatAsBooked(
+                            seatNumber
+                        );
+
+                    }
+                );
+
+
+                /*
+                 * Update status.
+                 */
+
+                availabilityStatus.textContent =
+                    "Updated just now";
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Seat availability error:",
+                    error
+                );
+
+                availabilityStatus.textContent =
+                    "Connection unavailable";
+
+            }
+
+        }
+
+
+        /* =========================================
+           FIRST AVAILABILITY CHECK
+        ========================================= */
+
+        checkSeatAvailability();
+
+
+        /* =========================================
+           CHECK EVERY 5 SECONDS
+        ========================================= */
+
+        setInterval(
+            checkSeatAvailability,
+            5000
+        );
+
+
+        /* =========================================
+           PREVENT EMPTY BOOKING
+        ========================================= */
+
+        document
+            .getElementById("seatForm")
+            .addEventListener(
+                "submit",
+                function (event) {
+
+                    const selected =
+                        document.querySelectorAll(
+                            ".seat-checkbox:checked"
+                        );
+
+
+                    if (selected.length === 0) {
+
+                        event.preventDefault();
+
+                        alert(
+                            "Please select at least one available seat."
+                        );
+
+                    }
+
+                }
+            );
+
+
+        /*
+         * Make sure the initial count is correct.
+         */
+
+        updateSelectedCount();
+
+    </script>
 
 
 </body>

@@ -5,12 +5,551 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Booking Confirmed - MovieTicket</title>
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <style>
+
+        /* =====================================================
+           BOOKING SUCCESS PAGE
+        ===================================================== */
+
+        .booking-success-page {
+            min-height: 100vh;
+            padding: 50px 20px 80px;
+            background: #f5f5f5;
+        }
+
+
+        .booking-success-container {
+            max-width: 950px;
+            margin: 0 auto;
+        }
+
+
+        /* =====================================================
+           SUCCESS HEADER
+        ===================================================== */
+
+        .booking-success-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+
+        .booking-success-icon {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 18px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            background: #ffcc00;
+
+            color: #111;
+
+            font-size: 35px;
+            font-weight: bold;
+        }
+
+
+        .booking-success-header h1 {
+            margin: 0;
+
+            font-size: 38px;
+            font-weight: 800;
+
+            color: #111;
+        }
+
+
+        .booking-success-header p {
+            margin-top: 10px;
+
+            font-size: 16px;
+
+            color: #666;
+        }
+
+
+        /* =====================================================
+           TICKET CARD
+        ===================================================== */
+
+        .booking-ticket {
+            overflow: hidden;
+
+            background: #ffffff;
+
+            border-radius: 18px;
+
+            box-shadow:
+                0 15px 40px rgba(0, 0, 0, 0.12);
+        }
+
+
+        /* =====================================================
+           TICKET TOP
+        ===================================================== */
+
+        .booking-ticket-top {
+            display: grid;
+
+            grid-template-columns: 1fr 1.5fr;
+
+            min-height: 280px;
+        }
+
+
+        .booking-poster-section {
+            background: #17171b;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            padding: 30px;
+        }
+
+
+        .booking-poster-section img {
+            width: 180px;
+            height: 250px;
+
+            object-fit: cover;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+
+        .booking-info-section {
+            padding: 35px;
+        }
+
+
+        .booking-info-section h2 {
+            margin: 0 0 25px;
+
+            font-size: 30px;
+
+            color: #111;
+        }
+
+
+        .booking-info-grid {
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 22px;
+        }
+
+
+        .booking-info-item {
+            min-width: 0;
+        }
+
+
+        .booking-info-label {
+            margin: 0 0 6px;
+
+            font-size: 11px;
+
+            font-weight: 700;
+
+            letter-spacing: 2px;
+
+            color: #777;
+        }
+
+
+        .booking-info-value {
+            margin: 0;
+
+            font-size: 17px;
+
+            font-weight: 700;
+
+            color: #111;
+        }
+
+
+        /* =====================================================
+           BOOKING REFERENCE
+        ===================================================== */
+
+        .booking-reference-box {
+            margin: 0;
+
+            padding: 25px 30px;
+
+            text-align: center;
+
+            background: #fff8d6;
+
+            border-top: 2px dashed #d5d5d5;
+            border-bottom: 2px dashed #d5d5d5;
+        }
+
+
+        .booking-reference-label {
+            margin: 0 0 8px;
+
+            font-size: 12px;
+
+            font-weight: 800;
+
+            letter-spacing: 2px;
+
+            color: #666;
+        }
+
+
+        .booking-reference-box h2 {
+            margin: 0;
+
+            font-size: 27px;
+
+            font-weight: 800;
+
+            letter-spacing: 2px;
+
+            color: #111;
+        }
+
+
+        .booking-reference-box p:last-child {
+            margin: 10px 0 0;
+
+            font-size: 13px;
+
+            color: #666;
+        }
+
+
+        /* =====================================================
+           TICKET DETAILS
+        ===================================================== */
+
+        .booking-details-section {
+            padding: 30px 35px;
+        }
+
+
+        .booking-details-grid {
+            display: grid;
+
+            grid-template-columns:
+                1fr
+                1fr;
+
+            gap: 25px;
+        }
+
+
+        .booking-detail-box {
+            padding: 20px;
+
+            background: #f5f5f5;
+
+            border-radius: 10px;
+        }
+
+
+        .booking-detail-box p {
+            margin: 0;
+        }
+
+
+        .booking-detail-label {
+            margin-bottom: 8px !important;
+
+            font-size: 11px;
+
+            font-weight: 700;
+
+            letter-spacing: 2px;
+
+            color: #777;
+        }
+
+
+        .booking-detail-value {
+            font-size: 18px;
+
+            font-weight: 700;
+
+            color: #111;
+        }
+
+
+        /* =====================================================
+           TOTAL AMOUNT
+        ===================================================== */
+
+        .booking-total-box {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            width: 100%;
+
+            box-sizing: border-box;
+
+            padding: 24px;
+
+            margin-top: 25px;
+
+            background: #eeeeee;
+
+            border-radius: 12px;
+        }
+
+
+        .booking-total-label {
+            margin: 0;
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+            letter-spacing: 2px;
+
+            color: #555;
+        }
+
+
+        .booking-total-price {
+            display: block;
+
+            color: #111111;
+
+            font-size: 30px;
+
+            font-weight: 800;
+
+            white-space: nowrap;
+
+            visibility: visible;
+
+            opacity: 1;
+        }
+
+
+        /* =====================================================
+           BUTTONS
+        ===================================================== */
+
+        .booking-action-buttons {
+            display: flex;
+
+            justify-content: center;
+
+            gap: 15px;
+
+            padding: 30px 35px 35px;
+        }
+
+
+        .booking-action-buttons a,
+        .booking-action-buttons button {
+            display: inline-flex;
+
+            align-items: center;
+            justify-content: center;
+
+            min-width: 160px;
+
+            padding: 13px 22px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            font-size: 14px;
+
+            font-weight: 700;
+
+            text-decoration: none;
+
+            cursor: pointer;
+        }
+
+
+        .booking-home-btn {
+            background: #ffcc00;
+
+            color: #111;
+        }
+
+
+        .booking-home-btn:hover {
+            background: #e6b800;
+        }
+
+
+        .booking-print-btn {
+            background: #111;
+
+            color: #ffffff;
+        }
+
+
+        .booking-print-btn:hover {
+            background: #333;
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media (max-width: 768px) {
+
+            .booking-success-page {
+                padding: 30px 15px 60px;
+            }
+
+
+            .booking-success-header h1 {
+                font-size: 30px;
+            }
+
+
+            .booking-ticket-top {
+                grid-template-columns: 1fr;
+            }
+
+
+            .booking-poster-section {
+                padding: 25px;
+            }
+
+
+            .booking-poster-section img {
+                width: 140px;
+                height: 200px;
+            }
+
+
+            .booking-info-section {
+                padding: 25px;
+            }
+
+
+            .booking-info-section h2 {
+                font-size: 25px;
+            }
+
+
+            .booking-info-grid {
+                grid-template-columns: 1fr;
+            }
+
+
+            .booking-details-section {
+                padding: 25px;
+            }
+
+
+            .booking-details-grid {
+                grid-template-columns: 1fr;
+            }
+
+
+            .booking-reference-box {
+                padding: 22px 15px;
+            }
+
+
+            .booking-reference-box h2 {
+                font-size: 21px;
+
+                word-break: break-word;
+            }
+
+
+            .booking-total-box {
+                padding: 20px;
+
+                gap: 15px;
+            }
+
+
+            .booking-total-price {
+                font-size: 24px;
+            }
+
+
+            .booking-action-buttons {
+                flex-direction: column;
+
+                padding: 25px;
+            }
+
+
+            .booking-action-buttons a,
+            .booking-action-buttons button {
+                width: 100%;
+            }
+
+        }
+
+
+        /* =====================================================
+           PRINT
+        ===================================================== */
+
+        @media print {
+
+            body {
+                background: #ffffff !important;
+            }
+
+
+            nav,
+            header,
+            footer,
+            .booking-action-buttons {
+                display: none !important;
+            }
+
+
+            .booking-success-page {
+                padding: 0;
+
+                background: #ffffff;
+            }
+
+
+            .booking-ticket {
+                box-shadow: none;
+
+                border: 1px solid #ddd;
+            }
+
+        }
+
+    </style>
 
 </head>
 
@@ -18,329 +557,335 @@
 <body>
 
 
-    <!-- =========================
-         NAVIGATION
-    ========================== -->
+    <!-- =====================================================
+         NAVBAR
+    ===================================================== -->
 
     <nav class="navbar">
 
-        <div class="logo">
-            🎬 MovieTicket
-        </div>
+        <div class="navbar-container">
 
-        <div class="nav-links">
-
-            <a href="/">
-                Home
+            <a
+                href="/"
+                class="logo"
+            >
+                🎬 MovieTicket
             </a>
 
-            <a href="/movies">
-                Movies
-            </a>
 
-            <a href="/shows">
-                Shows
-            </a>
+            <div class="nav-links">
 
-            {% if session.get("user_id") %}
-
-                <span class="welcome-user">
-                    Hi, {{ session.get("user_name") }}
-                </span>
-
-                <a href="/logout">
-                    Logout
+                <a href="/">
+                    Home
                 </a>
 
-            {% else %}
-
-                <a href="/login">
-                    Login
+                <a href="/movies">
+                    Movies
                 </a>
 
-            {% endif %}
+                <a href="/shows">
+                    Shows
+                </a>
+
+                {% if session.get("user_id") %}
+
+                    <a href="/my-bookings">
+                        My Bookings
+                    </a>
+
+                    <span class="nav-user">
+                        Hi, {{ session.get("username", "User") }}
+                    </span>
+
+                    <a href="/logout">
+                        Logout
+                    </a>
+
+                {% else %}
+
+                    <a href="/login">
+                        Login
+                    </a>
+
+                {% endif %}
+
+            </div>
 
         </div>
 
     </nav>
 
 
+    <!-- =====================================================
+         BOOKING SUCCESS
+    ===================================================== -->
 
-    <!-- =========================
-         CONFIRMATION HEADER
-    ========================== -->
+    <main class="booking-success-page">
 
-    <section class="confirmation-header">
-
-        <div class="success-icon">
-            ✓
-        </div>
-
-        <p class="hero-small-title">
-            MOVIETICKET
-        </p>
-
-        <h1>
-            Booking Confirmed
-        </h1>
-
-        <p>
-            Your movie tickets have been booked successfully.
-        </p>
-
-    </section>
+        <div class="booking-success-container">
 
 
+            <!-- SUCCESS HEADER -->
 
-    <!-- =========================
-         TICKET SECTION
-    ========================== -->
+            <div class="booking-success-header">
 
-    <section class="ticket-section">
+                <div class="booking-success-icon">
+                    ✓
+                </div>
+
+                <h1>
+                    Booking Confirmed
+                </h1>
+
+                <p>
+                    Your movie tickets have been successfully booked.
+                </p>
+
+            </div>
 
 
-        <div class="movie-ticket">
+            <!-- TICKET -->
+
+            <div class="booking-ticket">
 
 
-            <!-- TICKET MAIN -->
+                <!-- =================================================
+                     MOVIE INFORMATION
+                ================================================= -->
 
-            <div class="ticket-main">
+                <div class="booking-ticket-top">
 
 
-                <div class="ticket-top">
+                    <!-- POSTER -->
 
-                    <div>
+                    <div class="booking-poster-section">
 
-                        <p class="ticket-label">
-                            MOVIE
-                        </p>
+                        {% if show["poster"] %}
+
+                            <img
+                                src="{{ url_for(
+                                    'static',
+                                    filename='images/' + show['poster']
+                                ) }}"
+                                alt="{{ show['movie_title'] }}"
+                            >
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- INFORMATION -->
+
+                    <div class="booking-info-section">
 
                         <h2>
-                            {{ show["title"] }}
+                            {{ show["movie_title"] }}
                         </h2>
 
-                    </div>
 
-                    <div class="ticket-logo">
-                        🎬
-                    </div>
-
-                </div>
+                        <div class="booking-info-grid">
 
 
+                            <div class="booking-info-item">
 
-                <div class="ticket-divider"></div>
+                                <p class="booking-info-label">
+                                    THEATRE
+                                </p>
 
+                                <p class="booking-info-value">
+                                    {{ show["theatre"] }}
+                                </p>
 
-
-                <!-- TICKET DETAILS -->
-
-                <div class="ticket-details-grid">
-
-
-                    <div class="ticket-detail">
-
-                        <span>
-                            THEATRE
-                        </span>
-
-                        <strong>
-                            {{ show["theatre"] }}
-                        </strong>
-
-                    </div>
+                            </div>
 
 
-                    <div class="ticket-detail">
+                            <div class="booking-info-item">
 
-                        <span>
-                            DATE
-                        </span>
+                                <p class="booking-info-label">
+                                    SCREEN
+                                </p>
 
-                        <strong>
-                            {{ show["show_date"] }}
-                        </strong>
+                                <p class="booking-info-value">
+                                    {{ show["screen"] }}
+                                </p>
 
-                    </div>
-
-
-                    <div class="ticket-detail">
-
-                        <span>
-                            SHOW TIME
-                        </span>
-
-                        <strong>
-                            {{ show["show_time"] }}
-                        </strong>
-
-                    </div>
+                            </div>
 
 
-                    <div class="ticket-detail">
+                            <div class="booking-info-item">
 
-                        <span>
-                            TICKET PRICE
-                        </span>
+                                <p class="booking-info-label">
+                                    DATE
+                                </p>
 
-                        <strong>
-                            ₹{{ show["price"] }}
-                        </strong>
+                                <p class="booking-info-value">
+                                    {{ show["show_date"] }}
+                                </p>
 
-                    </div>
-
-
-                </div>
+                            </div>
 
 
+                            <div class="booking-info-item">
 
-                <div class="ticket-divider"></div>
+                                <p class="booking-info-label">
+                                    SHOW TIME
+                                </p>
 
+                                <p class="booking-info-value">
+                                    {{ show["show_time"] }}
+                                </p>
 
-
-                <!-- SEATS -->
-
-                <div class="ticket-seats">
-
-                    <div>
-
-                        <span>
-                            SEATS
-                        </span>
-
-                        <strong>
-
-                            {% for seat in selected_seats %}
-
-                                {{ seat }}
-
-                                {% if not loop.last %}
-                                    ,
-                                {% endif %}
-
-                            {% endfor %}
-
-                        </strong>
-
-                    </div>
+                            </div>
 
 
-                    <div>
+                            <div class="booking-info-item">
 
-                        <span>
-                            NUMBER OF SEATS
-                        </span>
+                                <p class="booking-info-label">
+                                    TICKET PRICE
+                                </p>
 
-                        <strong>
-                            {{ selected_seats|length }}
-                        </strong>
+                                <p class="booking-info-value">
+                                    ₹{{ show["price"] }}
+                                </p>
+
+                            </div>
+
+
+                            <div class="booking-info-item">
+
+                                <p class="booking-info-label">
+                                    NUMBER OF SEATS
+                                </p>
+
+                                <p class="booking-info-value">
+                                    {{ selected_seats|length }}
+                                </p>
+
+                            </div>
+
+
+                        </div>
 
                     </div>
 
                 </div>
 
 
+                <!-- =================================================
+                     BOOKING REFERENCE
+                ================================================= -->
 
-                <!-- TOTAL -->
+                <div class="booking-reference-box">
 
-                <div class="ticket-total">
+                    <p class="booking-reference-label">
+                        BOOKING REFERENCE
+                    </p>
 
-                    <span>
-                        TOTAL AMOUNT
-                    </span>
 
-                    <strong>
-                        ₹{{ total_amount }}
-                    </strong>
+                    <h2>
+                        {{ booking_reference }}
+                    </h2>
+
+
+                    <p>
+                        Keep this reference for your booking.
+                    </p>
+
+                </div>
+
+
+                <!-- =================================================
+                     BOOKING DETAILS
+                ================================================= -->
+
+                <div class="booking-details-section">
+
+
+                    <div class="booking-details-grid">
+
+
+                        <!-- SEATS -->
+
+                        <div class="booking-detail-box">
+
+                            <p class="booking-detail-label">
+                                SEATS
+                            </p>
+
+                            <p class="booking-detail-value">
+                                {{ selected_seats|join(", ") }}
+                            </p>
+
+                        </div>
+
+
+                        <!-- BOOKING STATUS -->
+
+                        <div class="booking-detail-box">
+
+                            <p class="booking-detail-label">
+                                STATUS
+                            </p>
+
+                            <p class="booking-detail-value">
+                                Confirmed
+                            </p>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <!-- TOTAL -->
+
+                    <div class="booking-total-box">
+
+                        <p class="booking-total-label">
+                            TOTAL AMOUNT
+                        </p>
+
+
+                        <div class="booking-total-price">
+                            ₹{{ "%.2f"|format(total_price|float) }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     ACTION BUTTONS
+                ================================================= -->
+
+                <div class="booking-action-buttons">
+
+                    <a
+                        href="/"
+                        class="booking-home-btn"
+                    >
+                        Back to Home
+                    </a>
+
+
+                    <button
+                        type="button"
+                        class="booking-print-btn"
+                        onclick="window.print()"
+                    >
+                        Print Ticket
+                    </button>
 
                 </div>
 
 
             </div>
 
-
-
-            <!-- TICKET SIDE -->
-
-            <div class="ticket-side">
-
-                <div class="ticket-side-content">
-
-                    <span>
-                        ADMIT
-                    </span>
-
-                    <strong>
-                        ONE
-                    </strong>
-
-                    <small>
-                        MOVIE TICKET
-                    </small>
-
-                </div>
-
-            </div>
-
-
         </div>
 
-
-
-        <!-- =========================
-             ACTION BUTTONS
-        ========================== -->
-
-        <div class="ticket-buttons">
-
-            <a href="/shows">
-
-                <button class="secondary-button">
-                    Book Another Ticket
-                </button>
-
-            </a>
-
-
-            <button
-                type="button"
-                class="primary-button"
-                onclick="window.print()"
-            >
-                Print Ticket
-            </button>
-
-        </div>
-
-
-        <p class="ticket-thank-you">
-            Thank you for booking with MovieTicket.
-        </p>
-
-
-    </section>
-
-
-
-    <!-- =========================
-         FOOTER
-    ========================== -->
-
-    <footer>
-
-        <h3>
-            🎬 MovieTicket
-        </h3>
-
-        <p>
-            Your simple movie ticket booking system.
-        </p>
-
-        <p class="footer-copy">
-            © 2026 MovieTicket. All rights reserved.
-        </p>
-
-    </footer>
+    </main>
 
 
 </body>

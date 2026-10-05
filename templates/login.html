@@ -80,8 +80,20 @@
 
 
 
+            <!-- LOGIN FORM -->
+
             <form method="POST">
 
+                <!-- CSRF PROTECTION -->
+
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                >
+
+
+                <!-- EMAIL -->
 
                 <div class="input-group">
 
@@ -100,6 +112,8 @@
 
 
 
+                <!-- PASSWORD -->
+
                 <div class="input-group">
 
                     <label>
@@ -117,6 +131,8 @@
 
 
 
+                <!-- LOGIN BUTTON -->
+
                 <button
                     type="submit"
                     class="auth-button"
@@ -128,6 +144,8 @@
             </form>
 
 
+
+            <!-- REGISTER LINK -->
 
             <div class="auth-footer">
 

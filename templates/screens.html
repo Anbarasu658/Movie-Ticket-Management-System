@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Screen Management - MovieTicket</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     NAVIGATION
+===================================================== -->
+
+<nav class="navbar">
+
+    <div class="logo">
+        🎬 MovieTicket
+    </div>
+
+
+    <div class="nav-links">
+
+        <a href="/">
+            Home
+        </a>
+
+        <a href="/movies">
+            Movies
+        </a>
+
+        <a href="/admin">
+            Admin Dashboard
+        </a>
+
+        <a href="/admin-logout">
+            Logout
+        </a>
+
+    </div>
+
+</nav>
+
+
+
+<!-- =====================================================
+     PAGE HEADER
+===================================================== -->
+
+<section class="admin-header">
+
+    <div>
+
+        <p class="hero-small-title">
+            ADMIN PANEL
+        </p>
+
+        <h1>
+            Screen Management
+        </h1>
+
+        <p>
+            Manage theatres, screens and auditorium capacities.
+        </p>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     MAIN CONTENT
+===================================================== -->
+
+<section class="admin-section">
+
+
+    <!-- =================================================
+         ADD SCREEN
+    ================================================== -->
+
+    <div class="admin-section-title">
+
+        <p>
+            SCREEN MANAGEMENT
+        </p>
+
+        <h2>
+            Add New Screen
+        </h2>
+
+    </div>
+
+
+    <div class="admin-card">
+
+
+        <form method="POST">
+
+            <!-- CSRF PROTECTION -->
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+
+            <!-- THEATRE -->
+
+            <div class="form-group">
+
+                <label for="theatre">
+                    Theatre Name
+                </label>
+
+                <input
+                    type="text"
+                    id="theatre"
+                    name="theatre"
+                    placeholder="Example: PVR Cinemas"
+                    maxlength="100"
+                    required
+                >
+
+            </div>
+
+
+
+            <!-- SCREEN -->
+
+            <div class="form-group">
+
+                <label for="screen_name">
+                    Screen / Auditorium Name
+                </label>
+
+                <input
+                    type="text"
+                    id="screen_name"
+                    name="screen_name"
+                    placeholder="Example: Screen 1"
+                    maxlength="50"
+                    required
+                >
+
+            </div>
+
+
+
+            <!-- CAPACITY -->
+
+            <div class="form-group">
+
+                <label for="capacity">
+                    Seat Capacity
+                </label>
+
+                <input
+                    type="number"
+                    id="capacity"
+                    name="capacity"
+                    placeholder="Example: 40"
+                    min="1"
+                    max="500"
+                    required
+                >
+
+            </div>
+
+
+
+            <!-- BUTTONS -->
+
+            <div class="form-actions">
+
+                <button
+                    type="submit"
+                    class="admin-primary-button"
+                >
+                    + Add Screen
+                </button>
+
+
+                <a
+                    href="/admin"
+                    class="admin-secondary-button"
+                >
+                    Back to Dashboard
+                </a>
+
+            </div>
+
+
+        </form>
+
+    </div>
+
+
+
+    <!-- =================================================
+         EXISTING SCREENS
+    ================================================== -->
+
+    <div class="admin-section-title">
+
+        <p>
+            EXISTING SCREENS
+        </p>
+
+        <h2>
+            Theatre Screens
+        </h2>
+
+    </div>
+
+
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        ID
+                    </th>
+
+                    <th>
+                        THEATRE
+                    </th>
+
+                    <th>
+                        SCREEN
+                    </th>
+
+                    <th>
+                        CAPACITY
+                    </th>
+
+                    <th>
+                        ACTION
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+
+                {% for screen in screens %}
+
+                <tr>
+
+                    <td>
+                        {{ screen['id'] }}
+                    </td>
+
+                    <td>
+                        {{ screen['theatre'] }}
+                    </td>
+
+                    <td>
+                        {{ screen['screen_name'] }}
+                    </td>
+
+                    <td>
+                        {{ screen['capacity'] }} seats
+                    </td>
+
+                    <td>
+
+                        <!-- DELETE SCREEN -->
+
+                        <form
+                            method="POST"
+                            action="/admin/delete-screen/{{ screen['id'] }}"
+                            style="margin: 0;"
+                            onsubmit="return confirm(
+                                'Are you sure you want to delete this screen?'
+                            );"
+                        >
+
+                            <!-- CSRF PROTECTION -->
+
+                            <input
+                                type="hidden"
+                                name="csrf_token"
+                                value="{{ csrf_token() }}"
+                            >
+
+
+                            <button
+                                type="submit"
+                                class="admin-secondary-button"
+                            >
+                                Delete
+                            </button>
+
+                        </form>
+
+                    </td>
+
+                </tr>
+
+                {% else %}
+
+                <tr>
+
+                    <td
+                        colspan="5"
+                        style="text-align: center;"
+                    >
+                        No screens available.
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+</section>
+
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer>
+
+    <h3>
+        🎬 MovieTicket
+    </h3>
+
+    <p>
+        Screen Management
+    </p>
+
+    <p class="footer-copy">
+        © 2026 MovieTicket. All rights reserved.
+    </p>
+
+</footer>
+
+
+</body>
+
+</html>

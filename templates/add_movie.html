@@ -46,6 +46,13 @@
             <form method="POST"
                   enctype="multipart/form-data">
 
+                <!-- CSRF Protection -->
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                >
+
 
                 <!-- Movie Title -->
                 <div class="form-group">

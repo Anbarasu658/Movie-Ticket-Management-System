@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>My Profile - MovieTicket</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+
+        /* =========================================
+           PROFILE PAGE
+        ========================================= */
+
+        .profile-page {
+            min-height: 70vh;
+            padding: 60px 20px;
+            background: #f5f6f8;
+        }
+
+        .profile-container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .profile-header h1 {
+            margin: 0;
+            font-size: 34px;
+            color: #171717;
+        }
+
+        .profile-header p {
+            margin-top: 8px;
+            color: #666666;
+        }
+
+
+        /* =========================================
+           PROFILE CARD
+        ========================================= */
+
+        .profile-card {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 35px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.10);
+            border: 1px solid #e3e3e3;
+        }
+
+
+        /* =========================================
+           PROFILE ICON
+        ========================================= */
+
+        .profile-avatar {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: #171717;
+            color: #ffcc00;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 38px;
+            font-weight: 800;
+        }
+
+
+        /* =========================================
+           PROFILE DETAILS
+        ========================================= */
+
+        .profile-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+            margin-top: 30px;
+        }
+
+        .profile-detail-box {
+            padding: 20px;
+            background: #f3f4f6;
+            border: 1px solid #e0e2e5;
+            border-radius: 12px;
+        }
+
+        .profile-detail-label {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #666666;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .profile-detail-value {
+            font-size: 17px;
+            font-weight: 800;
+            color: #171717;
+        }
+
+
+        /* =========================================
+           PROFILE ACTIONS
+        ========================================= */
+
+        .profile-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .profile-button {
+            display: inline-block;
+            padding: 12px 22px;
+            border-radius: 9px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .bookings-button {
+            background: #171717;
+            color: #ffffff !important;
+        }
+
+        .bookings-button:hover {
+            background: #333333;
+        }
+
+        .movies-button {
+            background: #ffcc00;
+            color: #171717 !important;
+        }
+
+        .movies-button:hover {
+            background: #e6b800;
+        }
+
+
+        /* =========================================
+           MOBILE
+        ========================================= */
+
+        @media (max-width: 700px) {
+
+            .profile-page {
+                padding: 40px 15px;
+            }
+
+            .profile-card {
+                padding: 25px;
+            }
+
+            .profile-header h1 {
+                font-size: 28px;
+            }
+
+            .profile-details {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-actions {
+                flex-direction: column;
+            }
+
+            .profile-button {
+                width: 100%;
+                text-align: center;
+                box-sizing: border-box;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================================
+         NAVBAR
+    ========================================= -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            🎬 MovieTicket
+        </div>
+
+        <div class="nav-links">
+
+            <a href="/">
+                Home
+            </a>
+
+            <a href="/movies">
+                Movies
+            </a>
+
+            <a href="/shows">
+                Shows
+            </a>
+
+            <a href="/my-bookings">
+                My Bookings
+            </a>
+
+            <span class="welcome-user">
+                Hi, {{ session.get("user_name") }}
+            </span>
+
+            <a href="/logout">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- =========================================
+         PROFILE PAGE
+    ========================================= -->
+
+    <section class="profile-page">
+
+        <div class="profile-container">
+
+
+            <div class="profile-header">
+
+                <div class="profile-avatar">
+                    {{ user['name'][0]|upper }}
+                </div>
+
+                <h1>
+                    My Profile
+                </h1>
+
+                <p>
+                    View your MovieTicket account information.
+                </p>
+
+            </div>
+
+
+            <div class="profile-card">
+
+
+                <div class="profile-details">
+
+
+                    <!-- USER ID -->
+
+                    <div class="profile-detail-box">
+
+                        <span class="profile-detail-label">
+                            User ID
+                        </span>
+
+                        <span class="profile-detail-value">
+                            #{{ user['id'] }}
+                        </span>
+
+                    </div>
+
+
+                    <!-- NAME -->
+
+                    <div class="profile-detail-box">
+
+                        <span class="profile-detail-label">
+                            Name
+                        </span>
+
+                        <span class="profile-detail-value">
+                            {{ user['name'] }}
+                        </span>
+
+                    </div>
+
+
+                    <!-- EMAIL -->
+
+                    <div class="profile-detail-box">
+
+                        <span class="profile-detail-label">
+                            Email
+                        </span>
+
+                        <span class="profile-detail-value">
+                            {{ user['email'] }}
+                        </span>
+
+                    </div>
+
+
+                    <!-- ACCOUNT STATUS -->
+
+                    <div class="profile-detail-box">
+
+                        <span class="profile-detail-label">
+                            Account Status
+                        </span>
+
+                        <span class="profile-detail-value">
+                            Active
+                        </span>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- ACTION BUTTONS -->
+
+                <div class="profile-actions">
+
+                    <a
+                        href="/my-bookings"
+                        class="profile-button bookings-button"
+                    >
+                        My Bookings
+                    </a>
+
+
+                    <a
+                        href="/movies"
+                        class="profile-button movies-button"
+                    >
+                        Browse Movies
+                    </a>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================
+         FOOTER
+    ========================================= -->
+
+    <footer>
+
+        <h3>
+            🎬 MovieTicket
+        </h3>
+
+        <p>
+            Your simple movie ticket booking system.
+        </p>
+
+        <p class="footer-copy">
+            © 2026 MovieTicket. All rights reserved.
+        </p>
+
+    </footer>
+
+
+</body>
+
+</html>

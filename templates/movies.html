@@ -5,111 +5,554 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <title>Movies - MovieTicket</title>
+    <title>Movies | Movie Ticket Management</title>
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <style>
+
+        /* =====================================================
+           MOVIES PAGE
+        ===================================================== */
+
+        .movies-page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 50px 20px;
+        }
+
+
+        /* =====================================================
+           PAGE HEADER
+        ===================================================== */
+
+        .movies-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .movies-header h1 {
+            color: #ffcc00;
+            font-size: 38px;
+            margin-bottom: 10px;
+        }
+
+        .movies-header p {
+            color: #bbb;
+            font-size: 16px;
+        }
+
+
+        /* =====================================================
+           SEARCH AND FILTER SECTION
+        ===================================================== */
+
+        .movie-filter-box {
+            background: #151515;
+            border: 1px solid #2c2c2c;
+            border-radius: 14px;
+            padding: 25px;
+            margin-bottom: 35px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .movie-filter-form {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto auto;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .movie-filter-form input,
+        .movie-filter-form select {
+            width: 100%;
+            padding: 12px 14px;
+            background: #222;
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 8px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .movie-filter-form input:focus,
+        .movie-filter-form select:focus {
+            border-color: #ffcc00;
+        }
+
+        .movie-search-button {
+            padding: 12px 20px;
+            background: #ffcc00;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .movie-search-button:hover {
+            background: #ffd633;
+        }
+
+        .movie-clear-button {
+            display: inline-block;
+            padding: 12px 20px;
+            background: transparent;
+            color: #fff;
+            border: 1px solid #666;
+            border-radius: 8px;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .movie-clear-button:hover {
+            border-color: #ffcc00;
+            color: #ffcc00;
+        }
+
+
+        /* =====================================================
+           RESULT COUNT
+        ===================================================== */
+
+        .movie-result-count {
+            color: #aaa;
+            margin-bottom: 20px;
+            font-size: 15px;
+        }
+
+        .movie-result-count strong {
+            color: #ffcc00;
+        }
+
+
+        /* =====================================================
+           MOVIE GRID
+        ===================================================== */
+
+        .movies-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
+        }
+
+
+        /* =====================================================
+           MOVIE CARD
+        ===================================================== */
+
+        .movie-card {
+            background: #151515;
+            border: 1px solid #2c2c2c;
+            border-radius: 14px;
+            overflow: hidden;
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease,
+                border-color 0.2s ease;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-5px);
+            border-color: #444;
+            box-shadow:
+                0 18px 45px rgba(0, 0, 0, 0.35);
+        }
+
+
+        /* =====================================================
+           MOVIE POSTER
+        ===================================================== */
+
+        .movie-card img {
+            width: 100%;
+            height: 380px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .movie-no-poster {
+            width: 100%;
+            height: 380px;
+            background: #222;
+            color: #777;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+
+        /* =====================================================
+           MOVIE CONTENT
+        ===================================================== */
+
+        .movie-card-content {
+            padding: 20px;
+        }
+
+        .movie-card-content h2 {
+            color: #ffcc00;
+            font-size: 23px;
+            margin-bottom: 12px;
+        }
+
+        .movie-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .movie-info span {
+            background: #222;
+            border: 1px solid #3a3a3a;
+            color: #ddd;
+            padding: 5px 9px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+
+        .movie-description {
+            color: #bbb;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+
+        /* =====================================================
+           MOVIE BUTTONS
+        ===================================================== */
+
+        .movie-card-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .movie-card-buttons a {
+            flex: 1;
+            min-width: 110px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .movie-view-details {
+            display: inline-block;
+            padding: 11px 14px;
+            background: transparent;
+            color: #fff;
+            border: 1px solid #666;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 13px;
+            transition: 0.2s ease;
+        }
+
+        .movie-view-details:hover {
+            color: #ffcc00;
+            border-color: #ffcc00;
+        }
+
+        .movie-book-button {
+            display: inline-block;
+            padding: 11px 14px;
+            background: #ffcc00;
+            color: #000;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 13px;
+            transition: 0.2s ease;
+        }
+
+        .movie-book-button:hover {
+            background: #ffd633;
+            transform: translateY(-2px);
+        }
+
+
+        /* =====================================================
+           NO RESULTS
+        ===================================================== */
+
+        .no-movies {
+            background: #151515;
+            border: 1px solid #2c2c2c;
+            border-radius: 14px;
+            padding: 50px 20px;
+            text-align: center;
+        }
+
+        .no-movies h2 {
+            color: #ffcc00;
+            margin-bottom: 10px;
+        }
+
+        .no-movies p {
+            color: #aaa;
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 900px) {
+
+            .movie-filter-form {
+                grid-template-columns: 1fr 1fr;
+            }
+
+        }
+
+
+        @media (max-width: 600px) {
+
+            .movies-page {
+                padding: 30px 15px;
+            }
+
+            .movies-header h1 {
+                font-size: 30px;
+            }
+
+            .movie-filter-form {
+                grid-template-columns: 1fr;
+            }
+
+            .movie-card img,
+            .movie-no-poster {
+                height: 360px;
+            }
+
+            .movie-card-buttons {
+                flex-direction: column;
+            }
+
+            .movie-card-buttons a {
+                width: 100%;
+            }
+
+        }
+
+    </style>
 
 </head>
+
 
 <body>
 
 
-    <!-- ================= NAVBAR ================= -->
+    <!-- =====================================================
+         NAVIGATION
+    ====================================================== -->
 
-    <nav class="navbar">
+    <nav>
 
-        <div class="logo">
-            🎬 MovieTicket
-        </div>
+        <div class="nav-container">
 
-
-        <div class="nav-links">
-
-            <a href="/">
-                Home
+            <a href="/" class="logo">
+                Movie Ticket Management
             </a>
 
-            <a href="/movies">
-                Movies
-            </a>
+            <div class="nav-links">
 
-            <a href="/shows">
-                Shows
-            </a>
-
-
-            {% if session.get("user_id") %}
-
-                <span class="welcome-user">
-                    Hi, {{ session.get("user_name") }}
-                </span>
-
-                <a href="/my-bookings">
-                    My Bookings
+                <a href="/">
+                    Home
                 </a>
 
-                <a href="/logout">
-                    Logout
+                <a href="/movies">
+                    Movies
                 </a>
 
+                {% if session.get("user_id") %}
 
-            {% else %}
+                    <a href="/my-bookings">
+                        My Bookings
+                    </a>
 
-                <a href="/login">
-                    Login
-                </a>
+                    <a href="/profile">
+                        Profile
+                    </a>
 
-                <a href="/register">
-                    Register
-                </a>
+                    <a href="/logout">
+                        Logout
+                    </a>
 
-            {% endif %}
+                {% else %}
+
+                    <a href="/login">
+                        Login
+                    </a>
+
+                    <a href="/register">
+                        Register
+                    </a>
+
+                {% endif %}
+
+            </div>
 
         </div>
 
     </nav>
 
 
+    <!-- =====================================================
+         MOVIES PAGE
+    ====================================================== -->
 
-    <!-- ================= PAGE HEADER ================= -->
-
-    <section class="movies-page-header">
-
-        <p class="hero-small-title">
-            MOVIETICKET
-        </p>
-
-        <h1>
-            Movies
-        </h1>
-
-        <p>
-            Choose your favorite movie and book your tickets.
-        </p>
-
-    </section>
+    <main class="movies-page">
 
 
+        <!-- PAGE HEADER -->
 
-    <!-- ================= MOVIES ================= -->
+        <div class="movies-header">
 
-    <section class="movies-section">
+            <h1>
+                Now Showing
+            </h1>
 
-        <div class="movie-container">
+            <p>
+                Browse movies and book your tickets
+            </p>
+
+        </div>
 
 
-            {% for movie in movies %}
+        <!-- =================================================
+             SEARCH AND FILTERS
+        ================================================== -->
 
-                <div class="movie-card">
+        <div class="movie-filter-box">
+
+            <form
+                method="GET"
+                action="{{ url_for('movies') }}"
+                class="movie-filter-form"
+            >
+
+                <!-- Search -->
+
+                <input
+                    type="text"
+                    name="q"
+                    placeholder="Search movies..."
+                    value="{{ search_query }}"
+                >
 
 
-                    <!-- MOVIE POSTER -->
+                <!-- Genre -->
 
-                    <div class="movie-poster">
+                <select name="genre">
+
+                    <option value="">
+                        All Genres
+                    </option>
+
+                    {% for genre_item in genres %}
+
+                        <option
+                            value="{{ genre_item['genre'] }}"
+                            {% if selected_genre == genre_item['genre'] %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ genre_item['genre'] }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+
+                <!-- Language -->
+
+                <select name="language">
+
+                    <option value="">
+                        All Languages
+                    </option>
+
+                    {% for language_item in languages %}
+
+                        <option
+                            value="{{ language_item['language'] }}"
+                            {% if selected_language == language_item['language'] %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ language_item['language'] }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+
+                <!-- Search Button -->
+
+                <button
+                    type="submit"
+                    class="movie-search-button"
+                >
+                    Search
+                </button>
+
+
+                <!-- Clear Button -->
+
+                <a
+                    href="{{ url_for('movies') }}"
+                    class="movie-clear-button"
+                >
+                    Clear
+                </a>
+
+            </form>
+
+        </div>
+
+
+        <!-- =================================================
+             RESULT COUNT
+        ================================================== -->
+
+        <div class="movie-result-count">
+
+            Showing
+            <strong>{{ movies|length }}</strong>
+            movie{% if movies|length != 1 %}s{% endif %}
+
+        </div>
+
+
+        <!-- =================================================
+             MOVIE LIST
+        ================================================== -->
+
+        {% if movies %}
+
+            <div class="movies-grid">
+
+                {% for movie in movies %}
+
+                    <div class="movie-card">
+
+
+                        <!-- POSTER -->
 
                         {% if movie["poster"] %}
 
@@ -118,98 +561,161 @@
                                     'static',
                                     filename='images/' + movie['poster']
                                 ) }}"
-                                alt="{{ movie['title'] }} poster"
+                                alt="{{ movie['title'] }}"
                             >
 
                         {% else %}
 
-                            <div class="poster-placeholder">
+                            <div class="movie-no-poster">
 
-                                <span>
-                                    {{ movie["title"] }}
-                                </span>
+                                No Poster Available
 
                             </div>
 
                         {% endif %}
 
-                    </div>
+
+                        <!-- MOVIE INFORMATION -->
+
+                        <div class="movie-card-content">
+
+                            <h2>
+                                {{ movie["title"] }}
+                            </h2>
 
 
+                            <!-- Movie Metadata -->
 
-                    <!-- MOVIE INFORMATION -->
+                            <div class="movie-info">
 
-                    <div class="movie-info">
+                                {% if movie["genre"] %}
 
-                        <h3>
-                            {{ movie["title"] }}
-                        </h3>
+                                    <span>
+                                        {{ movie["genre"] }}
+                                    </span>
+
+                                {% endif %}
 
 
-                        <div class="movie-meta">
+                                {% if movie["language"] %}
 
-                            <span>
-                                {{ movie["genre"] }}
-                            </span>
+                                    <span>
+                                        {{ movie["language"] }}
+                                    </span>
 
-                            <span>
-                                {{ movie["language"] }}
-                            </span>
+                                {% endif %}
+
+
+                                {% if movie["duration"] %}
+
+                                    <span>
+                                        {{ movie["duration"] }}
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <!-- Description -->
+
+                            {% if movie["description"] %}
+
+                                <p class="movie-description">
+
+                                    {{ movie["description"] }}
+
+                                </p>
+
+                            {% else %}
+
+                                <p class="movie-description">
+
+                                    No description available.
+
+                                </p>
+
+                            {% endif %}
+
+
+                            <!-- =================================================
+                                 BUTTONS
+                            ================================================== -->
+
+                            <div class="movie-card-buttons">
+
+                                <!-- View Details -->
+
+                                <a
+                                    href="{{ url_for(
+                                        'movie_details',
+                                        movie_id=movie['id']
+                                    ) }}"
+                                    class="movie-view-details"
+                                >
+                                    View Details
+                                </a>
+
+
+                                <!-- Book Now -->
+
+                                <a
+                                    href="{{ url_for(
+                                        'book_now',
+                                        movie_id=movie['id']
+                                    ) }}"
+                                    class="movie-book-button"
+                                >
+                                    Book Now
+                                </a>
+
+                            </div>
+
 
                         </div>
 
-
-                        <p class="movie-duration">
-                            {{ movie["duration"] }}
-                        </p>
-
-
-                        <p class="movie-description">
-                            {{ movie["description"] }}
-                        </p>
-
-
-                        <a href="/book-now/{{ movie['id'] }}">
-
-                            <button class="book-button">
-                                Book Now
-                            </button>
-
-                        </a>
-
                     </div>
 
-                </div>
+                {% endfor %}
+
+            </div>
 
 
-            {% else %}
+        {% else %}
+
+
+            <!-- =================================================
+                 NO RESULTS
+            ================================================== -->
+
+            <div class="no-movies">
+
+                <h2>
+                    No Movies Found
+                </h2>
 
                 <p>
-                    No movies available currently.
+                    Try a different search term or filter.
                 </p>
 
-            {% endfor %}
-
-        </div>
-
-    </section>
+            </div>
 
 
+        {% endif %}
 
-    <!-- ================= FOOTER ================= -->
+
+    </main>
+
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
 
     <footer>
 
-        <h3>
-            🎬 MovieTicket
-        </h3>
-
         <p>
-            Your simple movie ticket booking system.
-        </p>
-
-        <p class="footer-copy">
-            © 2026 MovieTicket. All rights reserved.
+            &copy; 2026 Movie Ticket Management System.
+            All rights reserved.
         </p>
 
     </footer>

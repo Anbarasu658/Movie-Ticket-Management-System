@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>{{ movie["title"] }} | Movie Details</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <style>
+
+        /* =====================================================
+           MOVIE DETAILS PAGE
+        ===================================================== */
+
+        .movie-details-page {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
+
+
+        /* =====================================================
+           MOVIE DETAILS CONTAINER
+        ===================================================== */
+
+        .movie-details-container {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 45px;
+
+            background: #151515;
+            border: 1px solid #2c2c2c;
+            border-radius: 16px;
+
+            padding: 30px;
+
+            box-shadow:
+                0 15px 40px rgba(0, 0, 0, 0.35);
+        }
+
+
+        /* =====================================================
+           POSTER
+        ===================================================== */
+
+        .movie-details-poster {
+            width: 100%;
+            max-height: 520px;
+
+            object-fit: cover;
+
+            border-radius: 12px;
+
+            display: block;
+        }
+
+        .movie-no-poster {
+            width: 100%;
+            height: 520px;
+
+            background: #222;
+
+            color: #777;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            text-align: center;
+
+            border-radius: 12px;
+        }
+
+
+        /* =====================================================
+           MOVIE INFORMATION
+        ===================================================== */
+
+        .movie-details-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .movie-details-content h1 {
+            color: #ffcc00;
+
+            font-size: 40px;
+
+            margin-bottom: 20px;
+        }
+
+
+        /* =====================================================
+           MOVIE META
+        ===================================================== */
+
+        .movie-meta {
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 10px;
+
+            margin-bottom: 25px;
+        }
+
+        .movie-meta span {
+            background: #222;
+
+            border: 1px solid #444;
+
+            color: #fff;
+
+            padding: 8px 14px;
+
+            border-radius: 20px;
+
+            font-size: 14px;
+        }
+
+
+        /* =====================================================
+           DESCRIPTION
+        ===================================================== */
+
+        .movie-description {
+            color: #ddd;
+
+            font-size: 16px;
+
+            line-height: 1.8;
+
+            margin-bottom: 30px;
+        }
+
+
+        /* =====================================================
+           BUTTONS
+        ===================================================== */
+
+        .movie-details-buttons {
+            display: flex;
+
+            gap: 15px;
+
+            flex-wrap: wrap;
+        }
+
+        .details-back-button {
+            display: inline-block;
+
+            background: transparent;
+
+            color: #fff;
+
+            border: 1px solid #666;
+
+            text-decoration: none;
+
+            padding: 12px 24px;
+
+            border-radius: 8px;
+
+            transition: 0.2s ease;
+        }
+
+        .details-back-button:hover {
+            border-color: #ffcc00;
+
+            color: #ffcc00;
+        }
+
+
+        /* =====================================================
+           AVAILABLE SHOWS SECTION
+        ===================================================== */
+
+        .available-shows-section {
+            margin-top: 45px;
+        }
+
+        .available-shows-section h2 {
+            color: #ffcc00;
+
+            font-size: 30px;
+
+            margin-bottom: 10px;
+        }
+
+        .available-shows-subtitle {
+            color: #aaa;
+
+            margin-bottom: 25px;
+        }
+
+
+        /* =====================================================
+           SHOWS GRID
+        ===================================================== */
+
+        .movie-shows-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fit, minmax(250px, 1fr));
+
+            gap: 20px;
+        }
+
+
+        /* =====================================================
+           SHOW CARD
+        ===================================================== */
+
+        .movie-show-card {
+            background: #151515;
+
+            border: 1px solid #2c2c2c;
+
+            border-radius: 14px;
+
+            padding: 22px;
+
+            transition:
+                transform 0.2s ease,
+                border-color 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .movie-show-card:hover {
+            transform: translateY(-4px);
+
+            border-color: #555;
+
+            box-shadow:
+                0 12px 30px rgba(0, 0, 0, 0.3);
+        }
+
+
+        /* =====================================================
+           SHOW CARD INFORMATION
+        ===================================================== */
+
+        .movie-show-card h3 {
+            color: #fff;
+
+            font-size: 20px;
+
+            margin-bottom: 18px;
+        }
+
+        .show-detail-row {
+            display: flex;
+
+            justify-content: space-between;
+
+            gap: 15px;
+
+            padding: 10px 0;
+
+            border-bottom: 1px solid #292929;
+        }
+
+        .show-detail-row:last-of-type {
+            border-bottom: none;
+        }
+
+        .show-detail-label {
+            color: #999;
+
+            font-size: 13px;
+        }
+
+        .show-detail-value {
+            color: #fff;
+
+            font-size: 14px;
+
+            font-weight: bold;
+
+            text-align: right;
+        }
+
+
+        /* =====================================================
+           SHOW BOOK BUTTON
+        ===================================================== */
+
+        .show-book-button {
+            display: block;
+
+            width: 100%;
+
+            box-sizing: border-box;
+
+            margin-top: 18px;
+
+            padding: 11px;
+
+            background: #ffcc00;
+
+            color: #000;
+
+            text-align: center;
+
+            text-decoration: none;
+
+            border-radius: 8px;
+
+            font-weight: bold;
+
+            transition: 0.2s ease;
+        }
+
+        .show-book-button:hover {
+            background: #ffd633;
+
+            transform: translateY(-2px);
+        }
+
+
+        /* =====================================================
+           NO SHOWS
+        ===================================================== */
+
+        .no-shows {
+            background: #151515;
+
+            border: 1px solid #2c2c2c;
+
+            border-radius: 14px;
+
+            padding: 35px 20px;
+
+            text-align: center;
+        }
+
+        .no-shows h3 {
+            color: #ffcc00;
+
+            margin-bottom: 10px;
+        }
+
+        .no-shows p {
+            color: #aaa;
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 850px) {
+
+            .movie-details-container {
+                grid-template-columns: 1fr;
+
+                gap: 30px;
+            }
+
+            .movie-details-poster {
+                max-width: 350px;
+
+                margin: 0 auto;
+            }
+
+            .movie-no-poster {
+                max-width: 350px;
+
+                margin: 0 auto;
+            }
+
+            .movie-details-content {
+                text-align: center;
+            }
+
+            .movie-meta {
+                justify-content: center;
+            }
+
+            .movie-details-buttons {
+                justify-content: center;
+            }
+
+        }
+
+
+        @media (max-width: 600px) {
+
+            .movie-details-page {
+                margin: 30px auto;
+
+                padding: 0 15px;
+            }
+
+            .movie-details-container {
+                padding: 20px;
+            }
+
+            .movie-details-content h1 {
+                font-size: 30px;
+            }
+
+            .movie-details-buttons {
+                flex-direction: column;
+            }
+
+            .details-back-button {
+                text-align: center;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         NAVIGATION
+    ===================================================== -->
+
+    <nav>
+
+        <div class="nav-container">
+
+            <a href="/" class="logo">
+                Movie Ticket Management
+            </a>
+
+            <div class="nav-links">
+
+                <a href="/">
+                    Home
+                </a>
+
+                <a href="/movies">
+                    Movies
+                </a>
+
+                {% if session.get("user_id") %}
+
+                    <a href="/my-bookings">
+                        My Bookings
+                    </a>
+
+                    <a href="/logout">
+                        Logout
+                    </a>
+
+                {% else %}
+
+                    <a href="/login">
+                        Login
+                    </a>
+
+                    <a href="/register">
+                        Register
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </nav>
+
+
+    <!-- =====================================================
+         MAIN MOVIE DETAILS
+    ===================================================== -->
+
+    <main class="movie-details-page">
+
+
+        <!-- =================================================
+             MOVIE INFORMATION
+        ================================================== -->
+
+        <div class="movie-details-container">
+
+
+            <!-- POSTER -->
+
+            <div>
+
+                {% if movie["poster"] %}
+
+                    <img
+                        src="{{ url_for(
+                            'static',
+                            filename='images/' + movie['poster']
+                        ) }}"
+                        alt="{{ movie['title'] }}"
+                        class="movie-details-poster"
+                    >
+
+                {% else %}
+
+                    <div class="movie-no-poster">
+
+                        No Poster Available
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- INFORMATION -->
+
+            <div class="movie-details-content">
+
+                <h1>
+                    {{ movie["title"] }}
+                </h1>
+
+
+                <!-- MOVIE META -->
+
+                <div class="movie-meta">
+
+                    {% if movie["genre"] %}
+
+                        <span>
+                            Genre: {{ movie["genre"] }}
+                        </span>
+
+                    {% endif %}
+
+
+                    {% if movie["language"] %}
+
+                        <span>
+                            Language: {{ movie["language"] }}
+                        </span>
+
+                    {% endif %}
+
+
+                    {% if movie["duration"] %}
+
+                        <span>
+                            Duration: {{ movie["duration"] }}
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- DESCRIPTION -->
+
+                {% if movie["description"] %}
+
+                    <p class="movie-description">
+
+                        {{ movie["description"] }}
+
+                    </p>
+
+                {% else %}
+
+                    <p class="movie-description">
+
+                        No description is available
+                        for this movie.
+
+                    </p>
+
+                {% endif %}
+
+
+                <!-- BACK BUTTON -->
+
+                <div class="movie-details-buttons">
+
+                    <a
+                        href="{{ url_for('movies') }}"
+                        class="details-back-button"
+                    >
+                        Back to Movies
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             AVAILABLE SHOWS
+        ================================================== -->
+
+        <section class="available-shows-section">
+
+
+            <h2>
+                Available Showtimes
+            </h2>
+
+
+            <p class="available-shows-subtitle">
+
+                Select a theatre and showtime
+                to book your tickets.
+
+            </p>
+
+
+            {% if shows %}
+
+
+                <div class="movie-shows-grid">
+
+
+                    {% for show in shows %}
+
+
+                        <div class="movie-show-card">
+
+
+                            <h3>
+                                {{ show["theatre"] }}
+                            </h3>
+
+
+                            <!-- DATE -->
+
+                            <div class="show-detail-row">
+
+                                <span class="show-detail-label">
+                                    Date
+                                </span>
+
+                                <span class="show-detail-value">
+                                    {{ show["show_date"] }}
+                                </span>
+
+                            </div>
+
+
+                            <!-- TIME -->
+
+                            <div class="show-detail-row">
+
+                                <span class="show-detail-label">
+                                    Time
+                                </span>
+
+                                <span class="show-detail-value">
+                                    {{ show["show_time"] }}
+                                </span>
+
+                            </div>
+
+
+                            <!-- PRICE -->
+
+                            <div class="show-detail-row">
+
+                                <span class="show-detail-label">
+                                    Ticket Price
+                                </span>
+
+                                <span class="show-detail-value">
+                                    ₹{{ "%.2f"|format(show["price"]) }}
+                                </span>
+
+                            </div>
+
+
+                            <!-- BOOK -->
+
+                            <a
+                                href="{{ url_for(
+                                    'seats',
+                                    show_id=show['id']
+                                ) }}"
+                                class="show-book-button"
+                            >
+                                Select Seats
+                            </a>
+
+
+                        </div>
+
+
+                    {% endfor %}
+
+
+                </div>
+
+
+            {% else %}
+
+
+                <!-- NO SHOWS -->
+
+                <div class="no-shows">
+
+                    <h3>
+                        No Shows Available
+                    </h3>
+
+                    <p>
+                        There are currently no showtimes
+                        available for this movie.
+                    </p>
+
+                </div>
+
+
+            {% endif %}
+
+
+        </section>
+
+
+    </main>
+
+
+    <!-- =====================================================
+         FOOTER
+    ===================================================== -->
+
+    <footer>
+
+        <p>
+            &copy; 2026 Movie Ticket Management System.
+            All rights reserved.
+        </p>
+
+    </footer>
+
+
+</body>
+
+</html>

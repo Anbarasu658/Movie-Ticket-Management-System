@@ -13,3 +13,7 @@ database.db
 
 # VS Code settings
 .vscode/
+
+# Generated QR ticket images
+static/qr_codes/*
+!static/qr_codes/.gitkeep

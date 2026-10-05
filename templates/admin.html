@@ -71,7 +71,7 @@
         </h1>
 
         <p>
-            Manage movies, shows, users and bookings.
+            Manage movies, shows, screens, users and bookings.
         </p>
 
     </div>
@@ -88,13 +88,13 @@
 
 
     <!-- =================================================
-         STATISTICS
+         ANALYTICS
     ================================================== -->
 
     <div class="admin-container">
 
 
-        <!-- USERS -->
+        <!-- TOTAL USERS -->
 
         <div class="admin-card">
 
@@ -107,7 +107,7 @@
             </p>
 
             <p class="admin-number">
-                {{ users|length }}
+                {{ total_users }}
             </p>
 
             <p>
@@ -118,7 +118,7 @@
 
 
 
-        <!-- MOVIES -->
+        <!-- TOTAL MOVIES -->
 
         <div class="admin-card">
 
@@ -131,7 +131,7 @@
             </p>
 
             <p class="admin-number">
-                {{ movies|length }}
+                {{ total_movies }}
             </p>
 
             <p>
@@ -142,7 +142,7 @@
 
 
 
-        <!-- SHOWS -->
+        <!-- TOTAL SHOWS -->
 
         <div class="admin-card">
 
@@ -155,7 +155,7 @@
             </p>
 
             <p class="admin-number">
-                {{ shows|length }}
+                {{ total_shows }}
             </p>
 
             <p>
@@ -166,7 +166,7 @@
 
 
 
-        <!-- BOOKINGS -->
+        <!-- TOTAL BOOKINGS -->
 
         <div class="admin-card">
 
@@ -179,14 +179,111 @@
             </p>
 
             <p class="admin-number">
-                {{ bookings|length }}
+                {{ total_bookings }}
             </p>
 
             <p>
-                Booked seats
+                Total booked seats
             </p>
 
         </div>
+
+
+
+        <!-- CONFIRMED BOOKINGS -->
+
+        <div class="admin-card">
+
+            <div class="admin-card-icon">
+                ✓
+            </div>
+
+            <p class="admin-stat-label">
+                CONFIRMED
+            </p>
+
+            <p class="admin-number">
+                {{ confirmed_bookings }}
+            </p>
+
+            <p>
+                Active bookings
+            </p>
+
+        </div>
+
+
+
+        <!-- CANCELLED BOOKINGS -->
+
+        <div class="admin-card">
+
+            <div class="admin-card-icon">
+                ✕
+            </div>
+
+            <p class="admin-stat-label">
+                CANCELLED
+            </p>
+
+            <p class="admin-number">
+                {{ cancelled_bookings }}
+            </p>
+
+            <p>
+                Cancelled bookings
+            </p>
+
+        </div>
+
+
+
+        <!-- TOTAL REVENUE -->
+
+        <div class="admin-card">
+
+            <div class="admin-card-icon">
+                ₹
+            </div>
+
+            <p class="admin-stat-label">
+                TOTAL REVENUE
+            </p>
+
+            <p class="admin-number">
+                ₹{{ "%.2f"|format(total_revenue|float) }}
+            </p>
+
+            <p>
+                Confirmed bookings
+            </p>
+
+        </div>
+
+
+
+        <!-- TODAY'S BOOKINGS -->
+
+        <div class="admin-card">
+
+            <div class="admin-card-icon">
+                📅
+            </div>
+
+            <p class="admin-stat-label">
+                TODAY
+            </p>
+
+            <p class="admin-number">
+                {{ today_bookings }}
+            </p>
+
+            <p>
+                Today's bookings
+            </p>
+
+        </div>
+
 
     </div>
 
@@ -214,6 +311,8 @@
         style="max-width: 1200px; margin: 0 auto 60px;"
     >
 
+        <!-- ADD MOVIE -->
+
         <a href="/admin/add-movie">
 
             <button
@@ -226,6 +325,8 @@
         </a>
 
 
+        <!-- ADD SHOW -->
+
         <a href="/admin/add-show">
 
             <button
@@ -233,6 +334,20 @@
                 class="admin-secondary-button"
             >
                 + Add Show
+            </button>
+
+        </a>
+
+
+        <!-- MANAGE SCREENS -->
+
+        <a href="/admin/screens">
+
+            <button
+                type="button"
+                class="admin-secondary-button"
+            >
+                + Manage Screens
             </button>
 
         </a>
@@ -267,33 +382,19 @@
 
                 <tr>
 
-                    <th>
-                        ID
-                    </th>
+                    <th>ID</th>
 
-                    <th>
-                        POSTER
-                    </th>
+                    <th>POSTER</th>
 
-                    <th>
-                        TITLE
-                    </th>
+                    <th>TITLE</th>
 
-                    <th>
-                        GENRE
-                    </th>
+                    <th>GENRE</th>
 
-                    <th>
-                        LANGUAGE
-                    </th>
+                    <th>LANGUAGE</th>
 
-                    <th>
-                        DURATION
-                    </th>
+                    <th>DURATION</th>
 
-                    <th>
-                        ACTIONS
-                    </th>
+                    <th>ACTIONS</th>
 
                 </tr>
 
@@ -308,14 +409,10 @@
                 <tr>
 
 
-                    <!-- ID -->
-
                     <td>
                         {{ movie['id'] }}
                     </td>
 
-
-                    <!-- POSTER -->
 
                     <td>
 
@@ -346,35 +443,25 @@
                     </td>
 
 
-                    <!-- TITLE -->
-
                     <td class="table-movie-name">
                         {{ movie['title'] }}
                     </td>
 
-
-                    <!-- GENRE -->
 
                     <td>
                         {{ movie['genre'] }}
                     </td>
 
 
-                    <!-- LANGUAGE -->
-
                     <td>
                         {{ movie['language'] }}
                     </td>
 
 
-                    <!-- DURATION -->
-
                     <td>
                         {{ movie['duration'] }}
                     </td>
 
-
-                    <!-- ACTIONS -->
 
                     <td>
 
@@ -386,8 +473,7 @@
                             "
                         >
 
-
-                            <!-- EDIT BUTTON -->
+                            <!-- EDIT MOVIE -->
 
                             <a
                                 href="/admin/edit-movie/{{ movie['id'] }}"
@@ -403,24 +489,31 @@
                             </a>
 
 
-                            <!-- DELETE BUTTON -->
+                            <!-- DELETE MOVIE -->
 
-                            <a
-                                href="/admin/delete-movie/{{ movie['id'] }}"
-                                onclick="return confirm(
+                            <form
+                                method="POST"
+                                action="/admin/delete-movie/{{ movie['id'] }}"
+                                style="margin: 0;"
+                                onsubmit="return confirm(
                                     'Are you sure you want to delete this movie?'
                                 );"
                             >
 
+                                <input
+                                    type="hidden"
+                                    name="csrf_token"
+                                    value="{{ csrf_token() }}"
+                                >
+
                                 <button
-                                    type="button"
+                                    type="submit"
                                     class="admin-secondary-button"
                                 >
                                     Delete
                                 </button>
 
-                            </a>
-
+                            </form>
 
                         </div>
 
@@ -479,33 +572,21 @@
 
                 <tr>
 
-                    <th>
-                        ID
-                    </th>
+                    <th>ID</th>
 
-                    <th>
-                        MOVIE
-                    </th>
+                    <th>MOVIE</th>
 
-                    <th>
-                        THEATRE
-                    </th>
+                    <th>THEATRE</th>
 
-                    <th>
-                        DATE
-                    </th>
+                    <th>SCREEN</th>
 
-                    <th>
-                        TIME
-                    </th>
+                    <th>DATE</th>
 
-                    <th>
-                        PRICE
-                    </th>
+                    <th>TIME</th>
 
-                    <th>
-                        ACTION
-                    </th>
+                    <th>PRICE</th>
+
+                    <th>ACTION</th>
 
                 </tr>
 
@@ -526,12 +607,17 @@
 
 
                     <td class="table-movie-name">
-                        {{ show['title'] }}
+                        {{ show['movie_title'] }}
                     </td>
 
 
                     <td>
                         {{ show['theatre'] }}
+                    </td>
+
+
+                    <td>
+                        {{ show['screen'] or 'Not specified' }}
                     </td>
 
 
@@ -552,21 +638,31 @@
 
                     <td>
 
-                        <a
-                            href="/admin/delete-show/{{ show['id'] }}"
-                            onclick="return confirm(
+                        <!-- DELETE SHOW -->
+
+                        <form
+                            method="POST"
+                            action="/admin/delete-show/{{ show['id'] }}"
+                            style="margin: 0;"
+                            onsubmit="return confirm(
                                 'Are you sure you want to delete this show?'
                             );"
                         >
 
+                            <input
+                                type="hidden"
+                                name="csrf_token"
+                                value="{{ csrf_token() }}"
+                            >
+
                             <button
-                                type="button"
+                                type="submit"
                                 class="admin-secondary-button"
                             >
                                 Delete
                             </button>
 
-                        </a>
+                        </form>
 
                     </td>
 
@@ -578,7 +674,7 @@
                 <tr>
 
                     <td
-                        colspan="7"
+                        colspan="8"
                         style="text-align: center;"
                     >
                         No shows available.
@@ -623,17 +719,11 @@
 
                 <tr>
 
-                    <th>
-                        ID
-                    </th>
+                    <th>ID</th>
 
-                    <th>
-                        NAME
-                    </th>
+                    <th>NAME</th>
 
-                    <th>
-                        EMAIL
-                    </th>
+                    <th>EMAIL</th>
 
                 </tr>
 
@@ -711,41 +801,25 @@
 
                 <tr>
 
-                    <th>
-                        BOOKING ID
-                    </th>
+                    <th>BOOKING ID</th>
 
-                    <th>
-                        USER
-                    </th>
+                    <th>USER</th>
 
-                    <th>
-                        MOVIE
-                    </th>
+                    <th>MOVIE</th>
 
-                    <th>
-                        THEATRE
-                    </th>
+                    <th>THEATRE</th>
 
-                    <th>
-                        DATE
-                    </th>
+                    <th>DATE</th>
 
-                    <th>
-                        TIME
-                    </th>
+                    <th>TIME</th>
 
-                    <th>
-                        SEAT
-                    </th>
+                    <th>SEAT</th>
 
-                    <th>
-                        BOOKED ON
-                    </th>
+                    <th>STATUS</th>
 
-                    <th>
-                        ACTION
-                    </th>
+                    <th>BOOKED ON</th>
+
+                    <th>ACTION</th>
 
                 </tr>
 
@@ -761,7 +835,7 @@
 
 
                     <td>
-                        {{ booking['booking_id'] }}
+                        {{ booking['id'] }}
                     </td>
 
 
@@ -796,27 +870,56 @@
 
 
                     <td>
+
+                        {% if booking['booking_status'] == 'Cancelled' %}
+
+                        <span class="booking-status cancelled">
+                            CANCELLED
+                        </span>
+
+                        {% else %}
+
+                        <span class="booking-status">
+                            CONFIRMED
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
                         {{ booking['booking_date'] }}
                     </td>
 
 
                     <td>
 
-                        <a
-                            href="/admin/delete-booking/{{ booking['booking_id'] }}"
-                            onclick="return confirm(
+                        <!-- DELETE BOOKING -->
+
+                        <form
+                            method="POST"
+                            action="/admin/delete-booking/{{ booking['id'] }}"
+                            style="margin: 0;"
+                            onsubmit="return confirm(
                                 'Are you sure you want to delete this booking?'
                             );"
                         >
 
+                            <input
+                                type="hidden"
+                                name="csrf_token"
+                                value="{{ csrf_token() }}"
+                            >
+
                             <button
-                                type="button"
+                                type="submit"
                                 class="admin-secondary-button"
                             >
                                 Delete
                             </button>
 
-                        </a>
+                        </form>
 
                     </td>
 
@@ -828,7 +931,7 @@
                 <tr>
 
                     <td
-                        colspan="9"
+                        colspan="10"
                         style="text-align: center;"
                     >
                         No bookings available.
